@@ -944,6 +944,14 @@ function shuffle(a){
   for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}
   return b;
 }
+// Returns the seat (0-3) of the first player whose 13-card hand has no
+// Ace, King, Queen, Jack, or 10 — or -1 if every player has at least one.
+function weakHandSeat(){
+  for(let p=0;p<4;p++){
+    if(!G.hands[p].some(c=>RV[c.r]>=10)) return p;
+  }
+  return -1;
+}
 function beats(c,d,lead,trump){
   if(!d)return true;
   const ct=c.s===trump,dt=d.s===trump;
@@ -1289,7 +1297,7 @@ function resolve(){
   if(isDeal8Trick){
     // Set cur to trick winner BEFORE deal8 so aiGo targets correct player
     G.cur=W;
-    setTimeout(()=>{deal8();clearSlots();clearBuf();render();maybeAI(900+Math.random()*500);},2500);
+    setTimeout(()=>{if(deal8())return;clearSlots();clearBuf();render();maybeAI(900+Math.random()*500);},2500);
     return;
   }
   // Hand over
@@ -1353,6 +1361,16 @@ function deal8(){
     SND('deal');
   }
   G.phase='main';sortAll();
+  const wk=weakHandSeat();
+  if(wk>=0){
+    const cards=G.hands[wk].map(c=>c.r+c.s).join('  ');
+    const title='\u267B\uFE0F Reshuffling \u2014 Weak Hand';
+    const body='<div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.7">'+PNAME[wk]+' has no Ace, King, Queen, Jack, or 10 in all 13 cards:</div><div style="margin-top:10px;font-size:15px;color:var(--gl);letter-spacing:1px">'+cards+'</div><div style="margin-top:12px;font-size:12px;color:rgba(255,255,255,.5)">Dealing a fresh hand...</div>';
+    showModal(title,body,[],true);
+    if(NET.mode==='host')NET.broadcast({type:'modal',title,body});
+    setTimeout(newGame,1800);
+    return true;
+  }
   // G.cur was already set to the WINNER of the trump-revealing trick
   // (not necessarily G.trumpBy — someone else may have played a bigger
   // trump card and won it). Do not overwrite it here.

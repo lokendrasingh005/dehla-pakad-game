@@ -2557,6 +2557,15 @@ function renderArc(){
   const hand=G.hands[0];const n=hand.length;
   if(!n)return;
   const ok=(G.cur===0&&!G.gameOver)?getOk(0):new Set();
+  // Auto-play the last remaining card instead of waiting for a tap
+  if(G.cur===0&&!G.gameOver&&n===1&&ok.has(0)&&!isAISeat(0)&&!window.AUTOPLAY_LOCK){
+    window.AUTOPLAY_LOCK=true;
+    setTimeout(()=>{
+      window.AUTOPLAY_LOCK=false;
+      if(NET.mode==='client'){ NET.send({type:'play',cardId:hand[0].id}); G.sel=-1; }
+      else { doPlay(0,0); }
+    },500);
+  }
   // #arc lives inside the fixed-size #stage (400px design width) which is
   // then CSS-scaled to fit the real device — window.innerWidth is REAL
   // device pixels, not #stage's local coordinate space, so using it here

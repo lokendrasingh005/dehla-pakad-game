@@ -3673,7 +3673,7 @@ function updateRoombarPlayers(players){
    MENUS / INIT
 ══════════════════════════════════════ */
 function showDifficultyModal(onStart){
-  showModal('\uD83C\uDFB4 Dehla Coat',
+  showModal('<img src="icon-512.png" style="width:28px;height:28px;vertical-align:-6px;border-radius:6px;margin-right:6px;"> Dehla Coat',
   '<b>Teams:</b> Team A (you &amp; partner, across) &nbsp;vs&nbsp; Team B<br><br>'+
   '\u2705 5 cards dealt first<br>'+
   '\u2705 Follow suit \u2014 trump opens when void<br>'+
@@ -3689,7 +3689,7 @@ function showDifficultyModal(onStart){
   [{lbl:'Deal Cards',fn:onStart}]);
 }
 function showMainMenu(){
-  showModal('\uD83C\uDFB4 Dehla Coat',
+  showModal('<img src="icon-512.png" style="width:28px;height:28px;vertical-align:-6px;border-radius:6px;margin-right:6px;"> Dehla Coat',
     '<div style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:4px;">Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>',
     [
       {lbl:'Play vs AI',fn:()=>{closeModal();showDifficultyModal(newGame);}},

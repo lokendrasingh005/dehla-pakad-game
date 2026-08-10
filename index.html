@@ -1125,6 +1125,7 @@ function doPlay(p,idx){
 
   if(G.trick.length===4){
     if(NET.mode==='host'){applyPNAMEHost();broadcastState();}
+    renderArc();
     setTimeout(resolve,1100);
   } else {
     G.cur=(G.trick[G.trick.length-1].p+1)%4;

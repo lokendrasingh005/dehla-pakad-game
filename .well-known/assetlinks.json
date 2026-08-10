@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.lokendrasingh.dehlacoat",
+        "sha256_cert_fingerprints": ["4D:78:6B:87:7E:69:83:99:6E:17:8D:29:5A:D9:06:C5:2D:35:DB:57:ED:EC:DB:6B:2C:44:7B:0A:80:BB:90:FE"]
+      }
+    }]

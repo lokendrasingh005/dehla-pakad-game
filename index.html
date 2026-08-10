@@ -795,8 +795,7 @@ html,body{background:#0a0a0a;}
   <button class="btn" id="fsbtn" onclick="toggleFullscreen()" title="Toggle fullscreen">⛶</button>
   <button class="btn" id="mutebtn" onclick="toggleMute()" title="Toggle sound">🔊</button>
   <button class="btn" id="histbtn" onclick="showHist()" style="display:none">History</button>
-  <button class="btn" id="newgamebtn" onclick="newGame()">New Game</button>
-</div>
+  </div>
 
 </div><!-- /wrap -->
 
@@ -2961,9 +2960,7 @@ function showOptionsMenu(){
   const body=underAI
     ?'<div style="font-size:12px;color:rgba(255,255,255,.6)">AI is currently playing your turns for you.</div>'
     :'<div style="font-size:12px;color:rgba(255,255,255,.6)">Let AI play your turns for you — come back anytime and take control back.</div>';
-  showModal('\u22EE Options',body,underAI
-    ?[{lbl:'Take Back Control',fn:requestAIReclaim},{lbl:'Close',fn:closeModal}]
-    :[{lbl:'Hand Over to AI',fn:requestAIHandover},{lbl:'Close',fn:closeModal}]);
+  showModal('⋮ Options',body,(underAI?[{lbl:'Take Back Control',fn:requestAIReclaim}]:[{lbl:'Hand Over to AI',fn:requestAIHandover}]).concat(NET.mode!=='client'?[{lbl:'New Game',fn:()=>{closeModal();newGame();}}]:[]).concat([{lbl:'Close',fn:closeModal}]));
 }
 function requestAIHandover(){
   closeModal();
@@ -2984,7 +2981,7 @@ function updateBotbarVisibility(){
   const optBtn=document.getElementById('optionsbtn');
   if(newgameBtn) newgameBtn.style.display=(mp&&NET.mode!=='host')?'none':'inline-block';
   if(leaveBtn) leaveBtn.style.display=mp?'inline-block':'none';
-  if(optBtn) optBtn.style.display=mp?'inline-flex':'none';
+  if(optBtn) optBtn.style.display='inline-flex';
 }
 function setNetStatus(text,cls){
   const el=document.getElementById('rb-status');

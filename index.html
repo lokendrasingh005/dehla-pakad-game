@@ -793,6 +793,7 @@ html,body{background:#0a0a0a;}
   <span id="diffbadge" onclick="cycleDiff()" title="Change difficulty">⚡ Medium</span>
   <button class="btn" id="homebtn" onclick="goHome()" title="Back to main menu">🏠 Home</button>
   <button class="btn" id="fsbtn" onclick="toggleFullscreen()" title="Toggle fullscreen">⛶</button>
+  <button class="btn" id="mutebtn" onclick="toggleMute()" title="Toggle sound">🔊</button>
   <button class="btn" id="histbtn" onclick="showHist()" style="display:none">History</button>
   <button class="btn" id="newgamebtn" onclick="newGame()">New Game</button>
 </div>
@@ -828,6 +829,12 @@ const AC=new(window.AudioContext||window.webkitAudioContext)();
 function unlock(){AC.resume();}
 document.addEventListener('touchstart',unlock,{once:true});
 document.addEventListener('click',unlock,{once:true});
+document.addEventListener('touchstart',unlock,{once:true});
+document.addEventListener('click',unlock,{once:true});
+document.addEventListener('DOMContentLoaded',()=>{
+  const b=document.getElementById('mutebtn');
+  if(b&&localStorage.getItem('dc_muted')==='1') b.textContent='🔇';
+});
 
 function noise(dur,decay,vol=.4){
   const buf=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate);
@@ -892,7 +899,14 @@ function snd_deal(){noise(.06,120,.2);}
    logic), they just play whatever sound name the host sends them. */
 const SNDMAP={card:snd_card,sweep:snd_sweep,collect:snd_collect,ten:snd_ten,
   trump:snd_trump,win:snd_win,lose:snd_lose,coat:snd_coat,reset:snd_reset,deal:snd_deal};
-function playSndByName(name){const f=SNDMAP[name];if(f)f();}
+let MUTED=localStorage.getItem('dc_muted')==='1';
+function toggleMute(){
+  MUTED=!MUTED;
+  localStorage.setItem('dc_muted',MUTED?'1':'0');
+  const b=document.getElementById('mutebtn');
+  if(b) b.textContent=MUTED?'🔇':'🔊';
+}
+function playSndByName(name){if(MUTED)return;const f=SNDMAP[name];if(f)f();}
 function SND(name){
   playSndByName(name);
   if(typeof NET!=='undefined'&&NET.mode==='host') NET.broadcast({type:'sound',name});

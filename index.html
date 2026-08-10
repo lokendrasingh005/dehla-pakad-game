@@ -829,7 +829,7 @@ html,body{background:#0a0a0a;}
   const stage=document.getElementById('stage');
   function fit(){
     const vw=window.innerWidth, vh=window.innerHeight;
-    const scale=Math.min(vw/DESIGN_W, vh/DESIGN_H);
+    const scale=Math.max(vw/DESIGN_W, vh/DESIGN_H);
     stage.style.transform='scale('+scale+')';
   }
   fit();

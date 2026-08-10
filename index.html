@@ -12,7 +12,7 @@ if ('serviceWorker' in navigator) {
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Dehla Pakad</title>
+<title>Dehla Coat</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -789,7 +789,7 @@ html,body{background:#0a0a0a;}
 
 <!-- BOTTOM BAR -->
 <div id="botbar">
-  <div id="infomsg">Welcome to Dehla Pakad</div>
+  <div id="infomsg">Welcome to Dehla Coat</div>
   <span id="diffbadge" onclick="cycleDiff()" title="Change difficulty">⚡ Medium</span>
   <button class="btn" id="homebtn" onclick="goHome()" title="Back to main menu">🏠 Home</button>
   <button class="btn" id="fsbtn" onclick="toggleFullscreen()" title="Toggle fullscreen">⛶</button>
@@ -2920,10 +2920,10 @@ function roomJoinLink(code){
 function shareRoomCode(){
   const code=NET.roomCode||'';
   const link=roomJoinLink(code);
-  const text='Join my Dehla Pakad game! Room code: '+code+'\n'+link;
+  const text='Join my Dehla Coat game! Room code: '+code+'\n'+link;
   if(navigator.share){
     // Native share sheet — user picks WhatsApp (or any app) themselves.
-    navigator.share({title:'Dehla Pakad — Room '+code,text,url:link}).catch(()=>{/* user cancelled — no-op */});
+    navigator.share({title:'Dehla Coat — Room '+code,text,url:link}).catch(()=>{/* user cancelled — no-op */});
     return;
   }
   // No native share sheet (mainly desktop browsers) — open WhatsApp
@@ -3663,7 +3663,7 @@ function updateRoombarPlayers(players){
    MENUS / INIT
 ══════════════════════════════════════ */
 function showDifficultyModal(onStart){
-  showModal('\uD83C\uDFB4 Dehla Pakad',
+  showModal('\uD83C\uDFB4 Dehla Coat',
   '<b>Teams:</b> Team A (you &amp; partner, across) &nbsp;vs&nbsp; Team B<br><br>'+
   '\u2705 5 cards dealt first<br>'+
   '\u2705 Follow suit \u2014 trump opens when void<br>'+
@@ -3680,7 +3680,7 @@ function showDifficultyModal(onStart){
   [{lbl:'Deal Cards',fn:onStart}]);
 }
 function showMainMenu(){
-  showModal('\uD83C\uDFB4 Dehla Pakad',
+  showModal('\uD83C\uDFB4 Dehla Coat',
     '<div style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:4px;">Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>',
     [
       {lbl:'Play vs AI',fn:()=>{closeModal();showDifficultyModal(newGame);}},

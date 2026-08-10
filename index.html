@@ -600,10 +600,56 @@ html,body{background:#0a0a0a;}
   position:relative;width:400px;height:860px;flex-shrink:0;
   transform-origin:center center;
 }
+  #splash{
+  position:fixed;inset:0;z-index:99999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(120% 90% at 50% 40%, #33260e 0%, #1c1408 38%, #0e0a05 68%, #050403 100%);
+  font-family:Georgia,serif;
+  animation:splashIn 1s ease-out;
+}
+@keyframes splashIn{from{opacity:0}to{opacity:1}}
+#splash-logo{
+  width:170px;height:170px;border-radius:50%;
+  box-shadow:0 0 0 2px rgba(212,175,55,.5), 0 0 60px rgba(212,175,55,.35), 0 20px 50px rgba(0,0,0,.6);
+  animation:logoPop 1.1s cubic-bezier(.2,.9,.25,1.2) both;
+}
+@keyframes logoPop{
+  0%{opacity:0;transform:scale(.6);}
+  60%{opacity:1;transform:scale(1.06);}
+  100%{opacity:1;transform:scale(1);}
+}
+#splash-title{
+  margin-top:26px;font-size:40px;letter-spacing:5px;
+  font-family:Georgia,serif;font-weight:700;
+  background:linear-gradient(180deg,#f6d68a 0%,#d4af37 45%,#a9812a 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  opacity:0;animation:titleIn .9s ease-out .55s forwards;
+  text-shadow:0 2px 18px rgba(212,175,55,.25);
+}
+#splash-sub{
+  margin-top:10px;font-size:12px;letter-spacing:3px;text-transform:uppercase;
+  color:rgba(230,210,160,.55);font-family:Georgia,serif;
+  opacity:0;animation:titleIn .9s ease-out .85s forwards;
+}
+@keyframes titleIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+#splash-line{
+  width:0;height:1px;margin-top:18px;
+  background:linear-gradient(90deg,transparent,#d4af37,transparent);
+  animation:lineGrow 1s ease-out 1.1s forwards;
+}
+@keyframes lineGrow{from{width:0;}to{width:180px;}}
+#splash.hide{animation:splashOut .6s ease-in forwards;}
+@keyframes splashOut{to{opacity:0;transform:scale(1.03);}}
 </style>
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 </head>
 <body>
+  <div id="splash">
+  <img id="splash-logo" src="icon-512.png">
+  <div id="splash-title">DEHLA COAT</div>
+  <div id="splash-sub">A Classic Card Game</div>
+  <div id="splash-line"></div>
+  </div>
 <div id="stage-outer"><div id="stage">
 <div id="roombar">
   <span>Room <span class="rb-code" id="rb-code">------</span></span>
@@ -3688,16 +3734,16 @@ function showJoinRoomModal(prefillCode){
 
 setupNetworkResilience();
 updateBotbarVisibility();
-{
-  // Arriving via a shared "Share" link (?room=CODE) — jump straight to
-  // the join screen with the code prefilled instead of the main menu.
+setTimeout(function(){
+  const splash=document.getElementById('splash');
+  if(splash){splash.classList.add('hide');setTimeout(()=>splash.remove(),650);}
   const params=new URLSearchParams(location.search);
   const roomFromLink=roomCodeFromInput(params.get('room'));
   const saved=roomFromLink?null:loadSavedSession();
   if(saved) showWelcomeBackModal(saved);
   else if(roomFromLink) showJoinRoomModal(roomFromLink);
   else showMainMenu();
-}
+},3000);
   /* Android hardware Back button: go to main menu instead of exiting,
    double-back at the main menu actually exits. */
 let pendingExit=false, pendingExitTimer=null;

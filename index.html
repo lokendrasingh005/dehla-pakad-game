@@ -2723,8 +2723,19 @@ const FALLBACK_ICE_SERVERS=[
   {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}
 ];
 let _iceServersCache=null,_iceServersPromise=null;
+function showIceStatus(msg){
+  let el=document.getElementById('iceStatusBox');
+  if(!el){
+    el=document.createElement('div');
+    el.id='iceStatusBox';
+    el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font-size:12px;padding:4px 8px;text-align:center;font-family:monospace;';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg;
+}
 function fetchIceServers(){
   if(_iceServersPromise) return _iceServersPromise;
+  showIceStatus('ICE: checking metered.ca relay...');
   _iceServersPromise=(async()=>{
     try{
       const ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
@@ -2735,9 +2746,11 @@ function fetchIceServers(){
       const servers=await res.json();
       if(!Array.isArray(servers)||!servers.length) throw new Error('empty turn creds');
       _iceServersCache=[{urls:'stun:stun.l.google.com:19302'},...servers];
+      showIceStatus('ICE: OK - using your metered.ca relay');
     }catch(e){
       console.warn('Metered TURN fetch failed, falling back to public relay:',e);
       _iceServersCache=FALLBACK_ICE_SERVERS;
+      showIceStatus('ICE: FALLBACK - using free backup relay ('+e.message+')');
     }
     return _iceServersCache;
   })();

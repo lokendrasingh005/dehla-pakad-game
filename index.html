@@ -2632,7 +2632,9 @@ function fmsg(txt,top=35,_fromNet){
   // every connected player gets the same toast in real time.
   if(!_fromNet&&typeof NET!=='undefined'&&NET.mode==='host') NET.broadcast({type:'fmsg',txt,top});
 }
+let atHome=false; // tracks whether the main menu is the active screen (for the Android back button)
 function showModal(title,body,btns,big){
+  atHome=false;
   document.getElementById('mtitle').innerHTML=title;
   document.getElementById('mbody').innerHTML=body;
   const bb=document.getElementById('mbtns');bb.innerHTML='';
@@ -3640,6 +3642,7 @@ function showMainMenu(){
       {lbl:'Play vs AI',fn:()=>{closeModal();showDifficultyModal(newGame);}},
       {lbl:'Multiplayer',fn:()=>{closeModal();showMultiplayerMenu();}},
     ],true);
+  atHome=true;
 }
 function showMultiplayerMenu(){
   showModal('\uD83D\uDC65 Multiplayer',
@@ -3689,6 +3692,23 @@ updateBotbarVisibility();
   else if(roomFromLink) showJoinRoomModal(roomFromLink);
   else showMainMenu();
 }
+  /* Android hardware Back button: go to main menu instead of exiting,
+   double-back at the main menu actually exits. */
+let pendingExit=false, pendingExitTimer=null;
+history.pushState({dehla:true},'');
+window.addEventListener('popstate', function(){
+  if(atHome){
+    if(pendingExit){ clearTimeout(pendingExitTimer); pendingExit=false; return; }
+    pendingExit=true;
+    fmsg('Press back again to exit');
+    history.pushState({dehla:true},'');
+    pendingExitTimer=setTimeout(()=>{pendingExit=false;},2000);
+  } else {
+    history.pushState({dehla:true},'');
+    if(document.getElementById('modal').classList.contains('open')) closeModal();
+    showMainMenu();
+  }
+});
 </script>
 </body>
 </html>

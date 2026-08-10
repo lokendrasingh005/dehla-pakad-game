@@ -2581,12 +2581,11 @@ function renderArc(){
   const totalW=(n-1)*spread+CW;
   const startX=(W-totalW)/2;
 
-  // Arc angle: more pronounced for more cards
-  const maxDeg=Math.min(32,n*2.8);
-
-  // Arc vertical offset: cards curve upward at edges (true half-circle feel)
-  // Use a quadratic: center cards are at bottom, edge cards rise slightly
-  const arcRise=Math.min(18,n*1.2); // max px rise at edges
+  // Arc angle & rise are now FIXED to the initial 5-card look (not scaled
+  // by card count) so the fan style never visibly "jumps" when more
+  // cards are dealt in after trump opens.
+  const maxDeg=14;
+  const arcRise=6;
 
   hand.forEach((card,i)=>{
     const frac=n===1?0.5:i/(n-1);

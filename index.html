@@ -2725,15 +2725,23 @@ const FALLBACK_ICE_SERVERS=[
 const ICE_CACHE_KEY='dehla_ice_cache_v1';
 const ICE_CACHE_MAX_AGE=20*60*60*1000; // 20 hours
 let _iceServersCache=null,_iceServersPromise=null;
+window._iceStatusMsg='checking relay…';
 function showIceStatus(msg){
+  window._iceStatusMsg=msg;
   let el=document.getElementById('iceStatusBox');
   if(!el){
     el=document.createElement('div');
     el.id='iceStatusBox';
-    el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99999;background:#000;color:#0f0;font-size:12px;padding:4px 8px;text-align:center;font-family:monospace;';
-    document.body.appendChild(el);
+    el.style.cssText='position:absolute;top:4px;left:8px;z-index:25;color:rgba(255,255,255,.25);font-size:9px;font-family:monospace;pointer-events:none;user-select:none;';
+    const playEl=document.getElementById('play');
+    (playEl||document.body).appendChild(el);
   }
   el.textContent=msg;
+  const modalEl=document.getElementById('iceModalStatus');
+  if(modalEl) modalEl.textContent=msg;
+}
+function iceStatusLine(){
+  return '<div id="iceModalStatus" style="font-size:10px;color:rgba(255,255,255,.4);margin-top:8px;font-family:monospace;">'+(window._iceStatusMsg||'checking relay…')+'</div>';
 }
 function readIceCache(){
   try{
@@ -3409,7 +3417,7 @@ async function hostRoom(name){
   ROOMCOAT=[0,0];STARTER_SEAT=0; // fresh room — game 1 starts A1, coat history purged
   updateRoomCoatUI(ROOMCOAT);
   updateBotbarVisibility();
-  showModal('🎴 Creating Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Setting up your room…</div>',[]);
+  showModal('🎴 Creating Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Setting up your room…</div>'+iceStatusLine(),[]);
   const iceConfig=await getIceConfig();
   const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:iceConfig});
   NET.peer=peer;
@@ -3569,7 +3577,7 @@ const JOIN_TIMEOUT_MS=18000;
 async function joinRoom(code){
   if(typeof Peer==='undefined'){fmsg('Could not load networking library — check your connection');return;}
   NET.mode='client';NET.roomCode=code;
-  showModal('🔌 Joining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Connecting…</div>',[]);
+  showModal('🔌 Joining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Connecting…</div>'+iceStatusLine(),[]);
   const iceConfig=await getIceConfig();
   attemptJoin(code,iceConfig,false);
 }
@@ -3585,7 +3593,7 @@ function attemptJoin(code,iceConfig,forceRelay){
     if(!forceRelay){
       // Direct/STUN path never opened in time — retry forcing the TURN
       // relay only, which works even when direct paths are blocked.
-      showModal('🔌 Joining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Still connecting… trying a relay route (this can happen on VPNs or restrictive networks)</div>',[]);
+      showModal('🔌 Joining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Still connecting… trying a relay route (this can happen on VPNs or restrictive networks)</div>'+iceStatusLine(),[]);
       attemptJoin(code,iceConfig,true);
     } else {
       showModal('Could Not Connect','<div class="mp-err">Couldn\'t reach the host after trying a direct and a relay connection. This can happen on some VPNs or very restrictive networks — try turning off the VPN, switching networks, or checking the room code.</div>',[{lbl:'Try Again',fn:()=>{closeModal();showJoinRoomModal(code);}}]);

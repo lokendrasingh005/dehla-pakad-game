@@ -1,0 +1,3685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Dehla Pakad</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#c9952a;--gl:#f0c040;--gd:#7a5c10;
+  --red:#c0392b;--cream:#fdf6e3;
+  --felt:#4b1d78;
+  --cw:60px;--ch:86px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:'Raleway',sans-serif;}
+
+/* ═══ TABLE ═══ */
+#wrap{
+  position:fixed;inset:0;overflow:hidden;display:flex;flex-direction:column;
+  background:
+    radial-gradient(ellipse 110% 90% at 50% 60%,#6d2f9e 0%,#521f7c 45%,#33125a 75%,#12061f 100%);
+  perspective:900px;
+}
+#wrap::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.03) 3px,rgba(0,0,0,.03) 6px),
+             repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,0,0,.03) 3px,rgba(0,0,0,.03) 6px);
+}
+/* Rectangular table rim */
+#wrap::after{
+  content:'';position:absolute;inset:10px;border-radius:20px;pointer-events:none;z-index:1;
+  box-shadow:
+    0 0 0 8px rgba(50,22,5,.95),
+    0 0 0 14px rgba(100,55,12,.6),
+    0 0 0 18px rgba(60,30,5,.4),
+    inset 0 0 80px rgba(0,0,0,.35),
+    0 4px 60px rgba(0,0,0,.8);
+}
+
+/* ═══ SCOREBAR ═══ */
+#scorebar{
+  position:relative;z-index:30;flex-shrink:0;
+  background:linear-gradient(180deg,#1a0800 0%,#2e1205 60%,#3d1a08 100%);
+  border-bottom:2px solid var(--gd);
+  padding:4px 8px;
+  display:flex;justify-content:space-between;align-items:center;
+  box-shadow:0 3px 16px rgba(0,0,0,.7),0 1px 0 rgba(201,149,42,.1);
+}
+.st{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:100px;max-width:150px;}
+.st .lbl{font-family:'Cinzel',serif;font-size:13px;font-weight:700;letter-spacing:1.8px;color:var(--gl);text-transform:uppercase;white-space:normal;word-break:break-word;max-width:100%;text-align:center;text-shadow:0 0 8px rgba(201,149,42,.35);}
+.st .pips{display:flex;gap:4px;}
+.pip{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;border-radius:5px;
+  border:1.5px solid rgba(192,57,43,.3);
+  font-size:16px;font-weight:700;color:rgba(255,255,255,.15);
+  transition:all .4s;background:rgba(0,0,0,.4);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.4);
+}
+.pip.won{
+  border-color:var(--gold);color:var(--gl);
+  background:linear-gradient(135deg,rgba(201,149,42,.25),rgba(201,149,42,.08));
+  box-shadow:0 0 10px rgba(201,149,42,.5),inset 0 1px 0 rgba(255,220,100,.2);
+}
+.pip.r{border-color:rgba(192,57,43,.4);}
+.pip.r.won{border-color:#e74c3c;color:#ff7070;background:linear-gradient(135deg,rgba(192,57,43,.22),rgba(192,57,43,.06));box-shadow:0 0 10px rgba(192,57,43,.5);}
+.st .trk{font-size:16px;color:var(--gl);letter-spacing:.5px;font-family:'Cinzel',serif;font-weight:700;text-shadow:0 0 8px rgba(201,149,42,.4);}
+.smid{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.tbadge{
+  width:48px;height:48px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.05) 0%,rgba(0,0,0,.6) 100%);
+  border:2px solid var(--gd);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:700;transition:all .4s;
+  box-shadow:0 2px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.tbadge.on{border-color:var(--gold);box-shadow:0 0 18px rgba(201,149,42,.6),inset 0 1px 0 rgba(255,220,100,.15);}
+#tlbl{font-size:12px;font-weight:700;color:var(--gl);letter-spacing:1.2px;font-family:'Cinzel',serif;text-shadow:0 0 6px rgba(201,149,42,.35);}
+
+/* ═══ PLAY AREA ═══ */
+#play{
+  position:relative;z-index:5;flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:space-between;
+  padding:4px 2px 2px;min-height:0;overflow:hidden;
+}
+#phasebadge{
+  position:absolute;top:4px;right:8px;z-index:25;
+  font-size:10px;color:rgba(255,255,255,.35);font-family:'Cinzel',serif;letter-spacing:1px;
+}
+
+/* ═══ PLAYER NAMES ═══
+   Each nameplate sits in a fixed-width row (name pill + timer chip) so
+   that neither a long name nor the countdown appearing/disappearing
+   ever changes the box's footprint — this keeps the whole table
+   perfectly still instead of shifting left/right as text changes. */
+.nmrow{display:flex;align-items:center;justify-content:center;gap:3px;flex-shrink:0;}
+.nmrow.side{width:auto;flex-direction:column;}
+.nmrow.mid{width:190px;}
+.pname{
+  font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;
+  color:var(--gd);padding:3px 10px;border-radius:20px;
+  background:rgba(0,0,0,.5);border:1px solid rgba(201,149,42,.18);
+  transition:all .3s;text-transform:uppercase;white-space:nowrap;
+  box-shadow:0 1px 4px rgba(0,0,0,.4);
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;text-align:center;
+}
+.pname.on{
+  color:var(--gl);border-color:var(--gold);
+  background:rgba(201,149,42,.18);
+  animation:turnPulse 1.1s ease-in-out infinite;
+}
+@keyframes turnPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(201,149,42,.35),0 1px 0 rgba(255,220,100,.1);}
+  50%{transform:scale(1.06);box-shadow:0 0 22px rgba(255,205,80,.85),0 0 6px rgba(255,220,100,.5),0 1px 0 rgba(255,220,100,.2);}
+}
+.nmrow.side .pname{
+  writing-mode:vertical-rl;text-orientation:upright;
+  padding:10px 5px;border-radius:12px;white-space:nowrap;overflow:visible;
+  max-height:none;letter-spacing:2px;
+}
+.nmrow.side .tcd{writing-mode:horizontal-tb;}
+.pname.partner{color:#7de07e;border-color:rgba(120,217,122,.3);}
+.pname.you{color:#aee0f5;border-color:rgba(168,220,245,.3);}
+.pname.opponent{color:#ffd447;border-color:rgba(255,212,71,.35);}
+.pname.opponent.on{color:#ffe27a;border-color:#ffd447;background:rgba(255,212,71,.18);}
+/* Detached last-trick-winner badge — sits beside the nameplate instead
+   of inline in its text, with its own glowing pulse so it reads as a
+   clear signal rather than competing with the name for space. */
+.trophybadge{
+  display:none;flex-shrink:0;font-size:15px;line-height:1;
+  filter:drop-shadow(0 0 4px rgba(255,215,80,.9)) drop-shadow(0 0 9px rgba(255,190,40,.6));
+  animation:trophyGlow 1.3s ease-in-out infinite;
+}
+.trophybadge.show{display:inline-block;}
+.nmrow.side .trophybadge{writing-mode:horizontal-tb;}
+@keyframes trophyGlow{
+  0%,100%{transform:scale(1);filter:drop-shadow(0 0 4px rgba(255,215,80,.8)) drop-shadow(0 0 8px rgba(255,190,40,.5));}
+  50%{transform:scale(1.22);filter:drop-shadow(0 0 8px rgba(255,225,120,1)) drop-shadow(0 0 16px rgba(255,200,60,.85));}
+}
+.pname.urgent{color:#fff;border-color:#e74c3c;}
+.pname.urgent.on{animation:turnPulseUrgent 0.7s ease-in-out infinite;}
+@keyframes turnPulseUrgent{
+  0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(231,76,60,.5);}
+  50%{transform:scale(1.06);box-shadow:0 0 22px rgba(255,80,60,.9);}
+}
+/* Fixed-size timer chip — always reserves its space, just toggles
+   visibility, so it never nudges the layout when it appears. */
+.tcd{
+  flex-shrink:0;width:26px;height:20px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cinzel',serif;font-size:11px;font-weight:700;
+  background:rgba(0,0,0,.55);border:1px solid rgba(201,149,42,.4);color:var(--gl);
+  visibility:hidden;
+}
+.tcd.active{visibility:visible;}
+.tcd.urgent{color:#fff;border-color:#e74c3c;background:rgba(192,57,43,.35);animation:tcdpulse .7s ease-in-out infinite;}
+@keyframes tcdpulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+
+/* ═══ CARD BACKS ═══
+   Deep royal-navy base with a metallic gold/silver frame instead of the
+   old flat royal-blue — reads as a premium set rather than a stock deck. */
+.cb{
+  border-radius:6px;
+  background:
+    radial-gradient(ellipse at 50% 40%,rgba(212,175,90,.14) 0%,transparent 62%),
+    linear-gradient(145deg,#0b0f2e 0%,#131a3d 35%,#0a1030 65%,#060814 100%);
+  border:1.5px solid #b98f3a;
+  position:relative;overflow:hidden;flex-shrink:0;
+  box-shadow:2px 3px 8px rgba(0,0,0,.65),0 0 0 1px rgba(50,30,5,.5),inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 1px rgba(0,0,0,.4);
+  transform:translateZ(0);
+}
+.cb::before{
+  content:'';position:absolute;inset:3px;
+  border:1px solid rgba(212,175,90,.45);border-radius:3px;
+  background:
+    repeating-linear-gradient(45deg,transparent 0,transparent 4px,rgba(212,175,90,.05) 4px,rgba(212,175,90,.05) 8px),
+    repeating-linear-gradient(-45deg,transparent 0,transparent 4px,rgba(255,255,255,.02) 4px,rgba(255,255,255,.02) 8px);
+}
+.cb::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.10) 0%,transparent 45%);border-radius:6px;}
+.cb.top{width:30px;height:43px;}
+.cb.side{width:27px;height:39px;}
+
+/* ═══ FACE-UP CARD ═══ */
+.card{
+  border-radius:6px;
+  background:linear-gradient(160deg,#fffef8 0%,#fdf8ec 60%,#faf4e0 100%);
+  border:1.5px solid #c8b89a;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:3px 3px 2px;
+  box-shadow:
+    2px 4px 10px rgba(0,0,0,.55),
+    0 1px 0 rgba(255,255,255,.9),
+    inset 0 0 0 .5px rgba(255,255,255,.7);
+  position:relative;flex-shrink:0;overflow:hidden;
+  transform:translateZ(2px);
+  transition:transform .15s,box-shadow .15s;
+}
+.card::after{
+  content:'';position:absolute;inset:0;border-radius:5px;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.35) 0%,transparent 50%);
+}
+.card.red{color:var(--red);}
+.card.black{color:#1a1a1a;}
+.card .cr{font-weight:700;line-height:1;font-family:'Cinzel',serif;}
+.card .cs{line-height:1;}
+.card .cc{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.8;pointer-events:none;}
+.card.ten{
+  border-color:#b8960a;border-width:2px;
+  background:linear-gradient(160deg,#fffce0 0%,#fdf5b0 50%,#faf0c0 100%);
+}
+.card.ten::before{content:'';position:absolute;inset:0;border-radius:5px;background:radial-gradient(circle at 50% 30%,rgba(255,215,0,.12),transparent 70%);pointer-events:none;}
+.card.trp{background:linear-gradient(160deg,#fff8e8 0%,#fff0d0 60%,#ffe8b8 100%);}
+
+/* Card sizes */
+.card.played{width:var(--cw);height:var(--ch);}
+.card.played .cr{font-size:16px;}
+.card.played .cs{font-size:14px;}
+.card.played .cc{font-size:30px;}
+.card.sml{width:31px;height:45px;padding:2px;}
+.card.sml .cr{font-size:9px;}
+.card.sml .cs{font-size:9px;}
+.card.sml .cc{font-size:15px;}
+.card.hand{width:43px;height:63px;}
+.card.hand .cr{font-size:14px;}
+.card.hand .cs{font-size:13px;}
+.card.hand .cc{font-size:24px;}
+
+/* ═══ LAYOUT ═══ */
+#top-cards{position:relative;width:110px;height:48px;margin:0 auto;}
+#midrow{display:flex;width:100%;align-items:center;justify-content:space-between;gap:2px;flex:1;min-height:0;padding:0 1px;}
+.sidezone{display:flex;flex-direction:row;align-items:center;gap:2px;width:70px;flex-shrink:0;}
+.sidezone.left{flex-direction:row-reverse;}
+.sidecards{position:relative;width:44px;height:70px;}
+.cb.pile{position:absolute;}
+.pilecnt{
+  position:absolute;font-size:8px;color:rgba(255,255,255,.65);
+  font-family:'Cinzel',serif;background:rgba(0,0,0,.55);
+  border:1px solid rgba(201,149,42,.35);border-radius:7px;
+  padding:0 4px;line-height:12px;z-index:20;pointer-events:none;
+}
+#top-cards .pilecnt{bottom:-2px;right:-2px;}
+.sidecards .pilecnt{bottom:-2px;right:-4px;}
+#centercol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:1;min-width:0;}
+/* Middle team-A/B trick/tens boxes fully removed per design — that
+   info lives in the top scorebar instead. #hrow (and the heapzone
+   markup inside it) is kept in the DOM only so the JS that still
+   writes into it (updateHeapArrow etc.) has no null-ref errors, but
+   it never renders, freeing #centercol to center the plus-cross. */
+#hrow{display:none!important;}
+/* Center heap "pending buffer" pile — was only ever visually meaningful
+   on the host's own screen; removed per design (item 7). */
+#trickbuf{display:none!important;}
+.heapzone{
+  display:flex;flex-direction:column;align-items:center;gap:3px;min-width:130px;flex:1;
+  background:linear-gradient(160deg,rgba(20,10,30,.55) 0%,rgba(10,5,18,.4) 100%);
+  border:1px solid rgba(201,149,42,.28);border-radius:10px;
+  padding:7px 5px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 6px rgba(0,0,0,.35);
+}
+.heapzone .hl{
+  font-size:13px;color:rgba(240,225,190,.9);font-family:'Cinzel',serif;
+  letter-spacing:.5px;text-transform:uppercase;font-weight:700;text-align:center;
+  max-width:100%;white-space:normal;word-break:break-word;line-height:1.25;
+}
+.hcnt{font-size:17px;color:var(--gl);font-family:'Cinzel',serif;font-weight:700;letter-spacing:.5px;}
+.heap-arrow{font-size:12px;line-height:1.2;color:var(--gl);text-shadow:0 0 8px rgba(240,192,64,.6);text-align:center;white-space:normal;word-break:break-word;max-width:100%;}
+.heap-tens{
+  margin-top:2px;display:flex;flex-direction:row;flex-wrap:nowrap;gap:5px;
+  justify-content:center;align-items:center;min-height:22px;width:100%;overflow-x:auto;
+}
+.htpip{
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:linear-gradient(160deg,#1c1006 0%,#2a1808 100%);
+  border:1px solid var(--gold);
+  border-radius:6px;padding:3px 8px;font-size:13px;
+  color:var(--gl);font-family:'Cinzel',serif;font-weight:700;letter-spacing:.3px;
+  box-shadow:0 1px 3px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,220,140,.12);
+}
+
+/* ═══ REVEAL STRIP ═══ */
+#revstrip{
+  display:none;flex-direction:column;align-items:center;gap:2px;
+  background:rgba(201,149,42,.08);border:1px solid rgba(201,149,42,.35);
+  border-radius:8px;padding:3px 6px;flex:1;
+  box-shadow:0 0 20px rgba(201,149,42,.1);
+}
+#revstrip.show{display:flex;}
+.rl{font-size:10px;color:var(--gold);letter-spacing:1px;font-family:'Cinzel',serif;text-transform:uppercase;text-align:center;}
+#revcards{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;}
+#revtimer{font-size:11px;color:var(--gl);font-family:'Cinzel',serif;}
+
+/* ═══ PLUS CROSS ═══ */
+#cross{
+  position:relative;width:230px;height:258px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+#cross::before{
+  content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(255,255,255,.06) 20%,rgba(255,255,255,.06) 80%,transparent);
+}
+#cross::after{
+  content:'';position:absolute;top:50%;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06) 20%,rgba(255,255,255,.06) 80%,transparent);
+}
+.pslot{position:absolute;display:flex;flex-direction:column;align-items:center;gap:1px;}
+#ps-top   {top:0;   left:50%;transform:translateX(-50%);}
+#ps-left  {left:0;  top:50%;transform:translateY(-50%);}
+#ps-btm   {bottom:0;left:50%;transform:translateX(-50%);}
+#ps-right {right:0; top:50%;transform:translateY(-50%);}
+.slotbox{
+  width:68px;height:96px;border-radius:7px;
+  border:1.5px dashed rgba(255,255,255,.08);
+  background:rgba(0,0,0,.1);
+  display:flex;align-items:center;justify-content:center;
+}
+.slotbox.hascard{border-color:transparent;background:transparent;}
+.slotlbl{font-size:9px;color:rgba(255,255,255,.4);font-family:'Cinzel',serif;letter-spacing:.5px;white-space:nowrap;max-width:80px;overflow:hidden;text-overflow:ellipsis;}
+.slotlbl.trophy::after{content:' \1F3C6';}
+
+/* ═══ PENDING BUFFER ═══ */
+#trickbuf{position:absolute;bottom:5px;right:5px;width:52px;height:62px;pointer-events:none;z-index:10;}
+.bufcard{
+  position:absolute;width:30px;height:44px;border-radius:5px;
+  background:linear-gradient(145deg,#1a237e,#0d47a1);
+  border:1.5px solid rgba(100,130,220,.25);
+  box-shadow:1px 2px 6px rgba(0,0,0,.55);
+}
+
+/* ═══ YOUR ARC HAND ═══ */
+#yourzone{width:100%;display:flex;flex-direction:column;align-items:center;gap:1px;flex-shrink:0;}
+#arc{position:relative;height:100px;width:100%;overflow:visible;}
+#arc .card{
+  position:absolute;bottom:4px;
+  cursor:pointer;touch-action:manipulation;
+  transition:bottom .25s cubic-bezier(.2,.8,.25,1),filter .25s ease,transform .25s cubic-bezier(.2,.8,.25,1);
+}
+#arc .card.sel{
+  bottom:52px;
+  filter:drop-shadow(0 6px 16px rgba(0,0,0,.6)) drop-shadow(0 0 16px rgba(201,149,42,.95));
+  border-color:var(--gold)!important;border-width:2.5px!important;
+  transform:translateZ(40px) scale(1.22) !important;
+  z-index:999!important;
+}
+#arc .card.dim{opacity:.35;cursor:default;}
+#arc .card.playable{cursor:pointer;}
+#arc .card.playable:hover{transform:translateY(-6px);filter:drop-shadow(0 6px 10px rgba(0,0,0,.5));}
+
+/* ═══ BOTTOM BAR ═══ */
+#botbar{
+  position:relative;z-index:20;flex-shrink:0;
+  background:linear-gradient(0deg,#1a0800 0%,#2e1205 60%,#3d1a08 100%);
+  border-top:2px solid var(--gd);padding:4px 10px;
+  display:flex;justify-content:space-between;align-items:center;gap:6px;
+  box-shadow:0 -3px 16px rgba(0,0,0,.6);
+}
+#infomsg{flex:1;font-size:13px;color:rgba(255,255,255,.75);text-align:center;font-family:'Raleway',sans-serif;}
+.btn{
+  background:linear-gradient(135deg,#c9952a 0%,#a07820 50%,#7a5c10 100%);
+  color:#1a0a00;border:none;border-radius:7px;padding:6px 13px;
+  font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:1px;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.5),0 1px 0 rgba(255,220,100,.2),inset 0 1px 0 rgba(255,220,100,.15);
+  white-space:nowrap;transition:transform .1s,box-shadow .1s;
+}
+#mbtns .btn{padding:11px 20px;font-size:15px;border-radius:9px;}
+.btn:active{transform:scale(.94);box-shadow:0 1px 4px rgba(0,0,0,.5);}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes cardIn{
+  0%{opacity:0;transform:translateZ(30px) scale(1.15) translateY(-10px);}
+  100%{opacity:1;transform:translateZ(2px) scale(1) translateY(0);}
+}
+.cin{animation:cardIn .3s cubic-bezier(.2,.8,.3,1) forwards;}
+
+/* Staggered deal-in — applied once per fresh deal (see DEALT_ANIM_PENDING
+   in renderArc) so a fresh hand visibly "arrives" instead of just
+   appearing, without replaying on every re-render of the same hand. */
+@keyframes dealIn{
+  0%{opacity:0;transform:translateY(-70px) scale(.7) rotate(0deg);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+.dealt{animation:dealIn .38s cubic-bezier(.2,.8,.25,1) both;}
+
+@keyframes sweepOut{
+  0%{opacity:1;transform:scale(1) translateZ(2px);}
+  50%{opacity:.5;transform:scale(.75) translateY(10px) translateZ(0);}
+  100%{opacity:0;transform:scale(.5) translateY(18px) translateZ(-5px);}
+}
+.sweep{animation:sweepOut .5s ease forwards;}
+
+@keyframes popScale{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
+.pop{animation:popScale .38s ease;}
+
+@keyframes floatUp{
+  0%{opacity:1;transform:translateX(-50%) translateY(0);}
+  20%{opacity:1;}
+  100%{opacity:0;transform:translateX(-50%) translateY(-55px);}
+}
+.fmsg{
+  position:fixed;left:50%;z-index:200;pointer-events:none;
+  background:rgba(5,5,5,.92);color:var(--gl);
+  padding:5px 16px;border-radius:20px;
+  font-family:'Cinzel',serif;font-size:13px;letter-spacing:.5px;
+  border:1px solid rgba(201,149,42,.4);white-space:nowrap;
+  animation:floatUp 2s ease forwards;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);
+}
+
+/* ═══ WIN PULSE ═══ */
+@keyframes winPulse{
+  0%{transform:translateZ(2px) scale(1);}
+  35%{transform:translateZ(20px) scale(1.28);box-shadow:0 0 28px rgba(201,149,42,.95),0 0 60px rgba(201,149,42,.4),4px 8px 20px rgba(0,0,0,.7);}
+  65%{transform:translateZ(18px) scale(1.24);}
+  100%{transform:translateZ(18px) scale(1.24);box-shadow:0 0 24px rgba(201,149,42,.85);}
+}
+.card.winner{
+  animation:winPulse .4s ease forwards;
+  z-index:50!important;
+  border-color:var(--gold)!important;border-width:2.5px!important;
+}
+
+/* ═══ TEN GLOW ═══ */
+@keyframes tenGlow{
+  0%,100%{box-shadow:2px 4px 10px rgba(0,0,0,.55),0 0 12px rgba(255,215,0,.5);}
+  50%{box-shadow:2px 4px 10px rgba(0,0,0,.55),0 0 22px rgba(255,215,0,.9),0 0 40px rgba(255,215,0,.4);}
+}
+.card.ten-glow{
+  border-color:#e6b800!important;border-width:2.5px!important;
+  animation:tenGlow .7s ease infinite;
+}
+
+/* ═══ MODAL ═══ */
+#modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.88);align-items:center;justify-content:center;padding:16px;}
+#modal.open{display:flex;animation:modalBgIn .2s ease;}
+@keyframes modalBgIn{0%{background:rgba(0,0,0,0);}100%{background:rgba(0,0,0,.88);}}
+#mbox{
+  background:linear-gradient(160deg,#150a00 0%,#251204 60%,#2d1606 100%);
+  border:1px solid var(--gold);border-radius:16px;
+  padding:30px 24px;max-width:392px;width:100%;min-height:50vh;
+  display:flex;flex-direction:column;justify-content:center;
+  text-align:center;
+  box-shadow:0 0 80px rgba(201,149,42,.2),0 20px 60px rgba(0,0,0,.8);
+  animation:mboxIn .28s cubic-bezier(.2,.8,.25,1);
+}
+@keyframes mboxIn{0%{opacity:0;transform:scale(.92) translateY(10px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+#mbox.mbox-lg{max-width:400px;min-height:56vh;padding:40px 26px;display:flex;flex-direction:column;justify-content:center;}
+#mtitle{font-family:'Cinzel',serif;font-size:25px;color:var(--gold);margin-bottom:14px;letter-spacing:1px;}
+#mbox.mbox-lg #mtitle{font-size:32px;margin-bottom:20px;}
+#mbox.mbox-lg #mbody{font-size:17px;margin-bottom:28px;}
+#mbody{font-size:15px;color:rgba(255,255,255,.75);line-height:1.85;margin-bottom:20px;}
+#mbody .big{font-size:48px;margin:8px 0;}
+#mbody .scorerow{display:flex;justify-content:space-around;margin:14px 0;gap:12px;}
+#mbody .scorebox{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(201,149,42,.25);border-radius:10px;padding:16px 8px;}
+#mbody .scorebox.win{border-color:var(--gold);background:linear-gradient(160deg,rgba(201,149,42,.28),rgba(201,149,42,.08));box-shadow:0 0 24px rgba(201,149,42,.45);animation:winPulseBox 1s ease-in-out infinite;}
+@keyframes winPulseBox{0%,100%{box-shadow:0 0 20px rgba(201,149,42,.4);}50%{box-shadow:0 0 34px rgba(255,205,80,.75);}}
+#mbody .scorebox .sbt{font-family:'Cinzel',serif;font-size:14px;color:var(--gl);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+#mbody .scorebox .sbn{font-family:'Cinzel',serif;font-size:38px;color:var(--gl);line-height:1;}
+#mbody .scorebox .sbsub{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px;}
+#mbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+#mbox.mbox-lg #mbtns{flex-direction:column;gap:14px;}
+#mbox.mbox-lg #mbtns .btn{width:100%;padding:18px 20px;font-size:17px;border-radius:12px;letter-spacing:1.5px;}
+
+/* ═══ DIFFICULTY BADGE ═══ */
+#diffbadge{
+  font-family:'Cinzel',serif;font-size:11px;color:var(--gd);
+  border:1px solid rgba(201,149,42,.3);border-radius:14px;
+  padding:3px 10px;cursor:pointer;white-space:nowrap;
+  background:rgba(0,0,0,.4);transition:all .2s;
+}
+#diffbadge:active{transform:scale(.93);}
+#diffbadge.easy{color:#7de07e;border-color:rgba(120,217,122,.4);}
+#diffbadge.hard{color:#ff9944;border-color:rgba(255,153,68,.5);}
+
+/* ═══ HEAP BUF TENS ═══ */
+#curbuf-tens{
+  min-height:16px;text-align:center;font-family:'Cinzel',serif;
+  font-size:12px;letter-spacing:.5px;display:flex;gap:4px;justify-content:center;flex-wrap:wrap;
+}
+.buften{
+  background:rgba(255,200,0,.18);border:1px solid rgba(255,200,0,.5);
+  border-radius:4px;padding:1px 5px;font-size:11px;font-weight:700;
+  font-family:'Cinzel',serif;animation:tenGlow .8s ease infinite;
+}
+
+/* ═══ HISTORY PANEL ═══ */
+#histpanel{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.95);overflow-y:auto;padding:14px 12px 30px;}
+#histpanel.open{display:block;}
+#histpanel h2{font-family:'Cinzel',serif;font-size:14px;color:var(--gold);text-align:center;margin-bottom:12px;letter-spacing:2px;}
+.trick-row{background:rgba(255,255,255,.03);border:1px solid rgba(201,149,42,.15);border-radius:8px;padding:8px 10px;margin-bottom:10px;}
+.trick-row .tr-hdr{font-family:'Cinzel',serif;font-size:9px;color:var(--gd);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;}
+.trick-row .tr-hdr .winner-tag{color:var(--gl);font-size:10px;}
+.trick-row .hands-at{font-size:8px;color:rgba(255,255,255,.28);margin-bottom:5px;line-height:1.6;}
+.trick-cards{display:flex;gap:8px;flex-wrap:wrap;}
+.tc{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.tc .tc-who{font-size:7px;color:rgba(255,255,255,.35);font-family:'Cinzel',serif;letter-spacing:.5px;}
+.tc .tc-card{
+  width:36px;height:52px;border-radius:5px;
+  background:linear-gradient(160deg,#fffef8,#fdf8ec);
+  border:1.5px solid #c8b89a;
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:2px;font-size:9px;font-weight:700;font-family:'Cinzel',serif;
+  position:relative;overflow:hidden;
+  box-shadow:1px 2px 6px rgba(0,0,0,.4);
+}
+.tc .tc-card::after{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.3) 0%,transparent 50%);border-radius:4px;}
+.tc .tc-card.red{color:var(--red);}
+.tc .tc-card.black{color:#1a1a1a;}
+.tc .tc-card.is-ten{border-color:#b8960a;border-width:2px;background:linear-gradient(160deg,#fffce0,#fdf5b0);}
+.tc .tc-card.is-trump{background:linear-gradient(160deg,#fff8e8,#ffe8b8);}
+.tc .tc-card.is-winner{border-color:var(--gold)!important;border-width:2px!important;box-shadow:0 0 10px rgba(201,149,42,.6),1px 2px 6px rgba(0,0,0,.4);}
+.tc .tc-card .suit-big{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:17px;opacity:.7;}
+.hand-snapshot{margin-top:4px;font-size:7px;color:rgba(255,255,255,.22);line-height:1.5;}
+.hand-snapshot span{display:inline-block;margin-right:3px;}
+.hand-snap-header{font-family:'Cinzel',serif;font-size:7px;color:rgba(255,255,255,.25);letter-spacing:.5px;margin-bottom:2px;}
+#histclose{display:block;margin:16px auto 0;background:linear-gradient(135deg,var(--gold),#8b6200);color:#1a0a00;border:none;border-radius:8px;padding:8px 24px;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;}
+
+/* ═══ MULTIPLAYER LOBBY / ROOM ═══ */
+#roombar{
+  display:none;position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:250;
+  background:rgba(10,5,0,.9);border:1px solid rgba(201,149,42,.5);border-radius:20px;
+  padding:4px 12px;align-items:center;gap:8px;font-family:'Cinzel',serif;font-size:11px;
+  color:var(--gl);box-shadow:0 2px 12px rgba(0,0,0,.6);white-space:nowrap;
+  max-width:94vw;
+}
+#roombar.show{display:flex;}
+/* When the room bar is visible, push the whole table down so it no
+   longer overlaps the trump badge in the scorebar */
+body.has-roombar #wrap{top:38px;}
+#roombar .rb-code{letter-spacing:2px;font-weight:700;}
+#roombar button{
+  background:rgba(201,149,42,.2);border:1px solid rgba(201,149,42,.5);color:var(--gl);
+  border-radius:10px;padding:2px 8px;font-family:'Cinzel',serif;font-size:10px;cursor:pointer;
+}
+#roombar #optionsbtn{padding:2px 8px;font-weight:900;font-size:14px;line-height:1;}
+/* Coat counter — glassmorphism pill with a clean split between the two
+   teams instead of one plain text string, so A vs B reads at a glance. */
+.coatpill{
+  display:inline-flex;align-items:center;gap:0;border-radius:14px;overflow:hidden;
+  background:rgba(255,255,255,.06);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 1px 4px rgba(0,0,0,.3);
+}
+.coatpill .cp-crown{padding:0 6px 0 8px;font-size:11px;}
+.coatpill .cp-a,.coatpill .cp-b{padding:2px 8px;font-weight:700;letter-spacing:.5px;}
+.coatpill .cp-a{color:#8fe89a;background:rgba(120,220,130,.12);}
+.coatpill .cp-b{color:#ffd447;background:rgba(255,212,71,.12);}
+#botbar #leavebtn{background:rgba(192,57,43,.18);border-color:rgba(231,76,60,.5);color:#ff8a7a;}
+.mp-input{
+  width:100%;box-sizing:border-box;background:rgba(255,255,255,.06);border:1px solid rgba(201,149,42,.4);
+  border-radius:9px;padding:12px 12px;color:var(--cream);font-family:'Raleway',sans-serif;font-size:16px;
+  margin:8px 0;text-align:center;letter-spacing:1px;
+}
+.mp-input::placeholder{color:rgba(255,255,255,.35);}
+.mp-label{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.5px;text-align:left;margin-top:10px;}
+.mp-players{margin:12px 0;text-align:left;font-size:14px;color:rgba(255,255,255,.8);line-height:2.1;}
+.mp-players .seat-tag{display:inline-block;min-width:88px;color:var(--gd);font-family:'Cinzel',serif;font-size:11px;}
+.mp-players .bot{color:rgba(255,255,255,.35);font-style:italic;}
+.mp-share{
+  display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.05);
+  border:1px solid rgba(201,149,42,.3);border-radius:9px;padding:8px 10px;margin:10px 0;flex-wrap:wrap;
+}
+.mp-share code{flex:1;font-size:15px;color:var(--gl);word-break:break-all;text-align:left;min-width:70px;}
+.mp-copybtn{
+  background:linear-gradient(135deg,#c9952a,#7a5c10);color:#1a0a00;border:none;border-radius:7px;
+  padding:7px 12px;font-family:'Cinzel',serif;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;
+}
+.mp-sharebtn{background:linear-gradient(135deg,#3fc26b,#1f7a44);color:#eafff0;}
+.diffopt{flex:1;padding:10px;border-radius:9px;font-family:Cinzel,serif;font-size:13px;cursor:pointer;border:1px solid transparent;transition:box-shadow .15s,transform .15s;background:none;}
+.diffopt.easy{border-color:rgba(120,217,122,.5);background:rgba(120,217,122,.1);color:#7de07e;}
+.diffopt.med{border-color:rgba(201,149,42,.5);background:rgba(201,149,42,.15);color:var(--gl);}
+.diffopt.hard{border-color:rgba(255,153,68,.5);background:rgba(255,100,30,.1);color:#ff9944;}
+.diffopt.sel{box-shadow:0 0 0 2px currentColor,0 0 10px currentColor;font-weight:800;transform:scale(1.04);}
+#mbody .mp-err{color:#ff7070;font-size:11px;margin-top:6px;}
+#rb-status{font-size:10px;}
+#rb-status.reconnecting{color:#ff9d4d;animation:rbpulse 1s infinite;}
+#rb-status.connected{color:#7de07e;}
+@keyframes rbpulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+/* ═══ RESPONSIVE SCALE STAGE ═══
+   The whole game is designed at a fixed reference size and then
+   scaled (and centered/letterboxed) to fit ANY device screen —
+   phone, tablet, or desktop — so the layout always looks correct
+   instead of stretching or breaking on odd screen sizes. */
+html,body{background:#0a0a0a;}
+#stage-outer{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:#0a0a0a;overflow:hidden;
+}
+#stage{
+  position:relative;width:400px;height:860px;flex-shrink:0;
+  transform-origin:center center;
+}
+</style>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<div id="stage-outer"><div id="stage">
+<div id="roombar">
+  <span>Room <span class="rb-code" id="rb-code">------</span></span>
+  <button onclick="copyRoomCode()">Copy Code</button>
+  <span id="rb-players"></span>
+  <span id="rb-coats" title="Coats won in this room so far"></span>
+  <span id="rb-status"></span>
+  <button id="optionsbtn" onclick="showOptionsMenu()" title="Options" style="display:none">&#8942;</button>
+</div>
+<div id="wrap">
+
+<!-- SCOREBAR -->
+<div id="scorebar">
+  <div class="st">
+    <div class="lbl" id="teamlbl-us">Team A</div>
+    <div class="pips">
+      <span class="pip"   id="pu0">♠</span>
+      <span class="pip"   id="pu1">♥</span>
+      <span class="pip r" id="pu2">♦</span>
+      <span class="pip r" id="pu3">♣</span>
+    </div>
+    <div class="trk" id="tku">0 tricks</div>
+  </div>
+  <div class="smid">
+    <div class="tbadge" id="tbadge">?</div>
+    <div id="tlbl">No Trump</div>
+  </div>
+  <div class="st">
+    <div class="lbl" id="teamlbl-them">Team B</div>
+    <div class="pips">
+      <span class="pip"   id="pt0">♠</span>
+      <span class="pip"   id="pt1">♥</span>
+      <span class="pip r" id="pt2">♦</span>
+      <span class="pip r" id="pt3">♣</span>
+    </div>
+    <div class="trk" id="tkt">0 tricks</div>
+  </div>
+</div>
+
+<!-- PLAY AREA -->
+<div id="play">
+  <div id="phasebadge">5-Card Phase</div>
+
+  <!-- TOP (partner p=2) -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+    <div class="nmrow mid">
+      <div class="pname partner" id="nm2">Player A2</div>
+      <div class="trophybadge" id="tw2">🏆</div>
+      <div class="tcd" id="tcd2"></div>
+    </div>
+    <div id="top-cards"></div>
+  </div>
+
+  <!-- MIDDLE ROW -->
+  <div id="midrow">
+
+    <!-- LEFT (p=1) -->
+    <div class="sidezone left">
+      <div class="sidecards" id="left-cards"></div>
+      <div class="nmrow side">
+        <div class="pname opponent" id="nm1">Player B1</div>
+        <div class="trophybadge" id="tw1">🏆</div>
+        <div class="tcd" id="tcd1"></div>
+      </div>
+    </div>
+
+    <!-- CENTER -->
+    <div id="centercol">
+      <div id="hrow">
+        <div class="heapzone">
+          <div class="hl" id="hl-us">Team A</div>
+          <div class="hcnt" id="huscnt">0 tricks</div>
+          <div class="heap-arrow" id="harr-us"></div>
+          <div class="heap-tens" id="htens-us"></div>
+        </div>
+        <div id="revstrip">
+          <div class="rl">🃏 Opener&apos;s Cards &nbsp;<span id="revtimer"></span></div>
+          <div id="revcards"></div>
+          <div id="rev2sec" style="display:none;flex-direction:column;align-items:center;gap:2px;margin-top:4px;padding-top:4px;border-top:1px solid rgba(201,149,42,.25);">
+            <div class="rl" style="font-size:9px;color:rgba(255,200,100,.8);">Also void in lead suit:</div>
+            <div id="revcards2" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;"></div>
+          </div>
+        </div>
+        <div class="heapzone">
+          <div class="hl" id="hl-tm">Team B</div>
+          <div class="hcnt" id="htmcnt">0 tricks</div>
+          <div class="heap-arrow" id="harr-tm"></div>
+          <div class="heap-tens" id="htens-tm"></div>
+        </div>
+      </div>
+
+      <!-- HEAP BUF TENS -->
+      <div id="curbuf-tens"></div>
+
+      <!-- PLUS CROSS -->
+      <div id="cross">
+        <div class="pslot" id="ps-top">
+          <div class="slotbox" id="sb-top"></div>
+          <div class="slotlbl" id="sl-top">Top</div>
+        </div>
+        <div class="pslot" id="ps-left">
+          <div class="slotbox" id="sb-left"></div>
+          <div class="slotlbl" id="sl-left">Left</div>
+        </div>
+        <div class="pslot" id="ps-btm">
+          <div class="slotbox" id="sb-btm"></div>
+          <div class="slotlbl" id="sl-btm">You</div>
+        </div>
+        <div class="pslot" id="ps-right">
+          <div class="slotbox" id="sb-right"></div>
+          <div class="slotlbl" id="sl-right">Right</div>
+        </div>
+        <div id="trickbuf"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT (p=3) -->
+    <div class="sidezone right">
+      <div class="sidecards" id="right-cards"></div>
+      <div class="nmrow side">
+        <div class="pname opponent" id="nm3">Player B2</div>
+        <div class="trophybadge" id="tw3">🏆</div>
+        <div class="tcd" id="tcd3"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- YOUR HAND -->
+  <div id="yourzone">
+    <div id="arc"></div>
+    <div class="nmrow mid">
+      <div class="pname you" id="nm0">You</div>
+      <div class="trophybadge" id="tw0">🏆</div>
+      <div class="tcd" id="tcd0"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div id="botbar">
+  <div id="infomsg">Welcome to Dehla Pakad</div>
+  <span id="diffbadge" onclick="cycleDiff()" title="Change difficulty">⚡ Medium</span>
+  <button class="btn" id="fsbtn" onclick="toggleFullscreen()" title="Toggle fullscreen">⛶</button>
+  <button class="btn" id="histbtn" onclick="showHist()" style="display:none">History</button>
+  <button class="btn" id="newgamebtn" onclick="newGame()">New Game</button>
+  <button class="btn" id="leavebtn" onclick="confirmLeave()" style="display:none">Leave</button>
+</div>
+
+</div><!-- /wrap -->
+
+<!-- HISTORY PANEL -->
+<div id="histpanel">
+  <h2>&#x1F0CF; Game History</h2>
+  <div id="histcontent"></div>
+  <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+    <button id="histclose" onclick="closeHist()">Close</button>
+    <button id="histdl" onclick="downloadHistory()" style="background:linear-gradient(135deg,#2a6c9c,#1a4c7c);color:#e0f0ff;border:none;border-radius:8px;padding:8px 20px;font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;">&#x2B07; Download Log</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+  <div id="mbox">
+    <div id="mtitle"></div>
+    <div id="mbody"></div>
+    <div id="mbtns"></div>
+  </div>
+</div>
+
+</div></div><!-- /stage /stage-outer -->
+
+<script>
+/* Fit the fixed-size #stage into the real viewport on any device */
+(function(){
+  const DESIGN_W=400, DESIGN_H=860;
+  const stage=document.getElementById('stage');
+  function fit(){
+    const vw=window.innerWidth, vh=window.innerHeight;
+    const scale=Math.min(vw/DESIGN_W, vh/DESIGN_H);
+    stage.style.transform='scale('+scale+')';
+  }
+  fit();
+  window.addEventListener('resize',fit);
+  window.addEventListener('orientationchange',fit);
+})();
+</script>
+
+<script>
+/* ══════════════════════════════════════
+   AUDIO ENGINE
+══════════════════════════════════════ */
+const AC=new(window.AudioContext||window.webkitAudioContext)();
+function unlock(){AC.resume();}
+document.addEventListener('touchstart',unlock,{once:true});
+document.addEventListener('click',unlock,{once:true});
+
+function noise(dur,decay,vol=.4){
+  const buf=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/AC.sampleRate*decay);
+  const s=AC.createBufferSource();s.buffer=buf;
+  const g=AC.createGain();g.gain.value=vol;
+  s.connect(g);g.connect(AC.destination);s.start();
+}
+function tone(freq,dur,vol=.18,type='sine',delay=0){
+  const o=AC.createOscillator();
+  const g=AC.createGain();
+  o.type=type;o.frequency.value=freq;
+  g.gain.setValueAtTime(0,AC.currentTime+delay);
+  g.gain.linearRampToValueAtTime(vol,AC.currentTime+delay+0.04);
+  g.gain.linearRampToValueAtTime(0,AC.currentTime+delay+dur);
+  o.connect(g);g.connect(AC.destination);
+  o.start(AC.currentTime+delay);o.stop(AC.currentTime+delay+dur+.05);
+}
+
+function snd_card(){noise(.1,70,.32);}
+function snd_sweep(){
+  tone(280,.22,.09,'sine');
+  tone(180,.28,.07,'sine',.05);
+}
+function snd_collect(){
+  noise(.25,20,.45);
+  tone(220,.3,.12,'triangle',.05);
+}
+function snd_ten(){
+  // Sparkle chord
+  tone(880,.25,.12,'sine');
+  tone(1108,.22,.09,'sine',.06);
+  tone(1320,.2,.07,'sine',.12);
+}
+function snd_trump(){
+  tone(330,.2,.15,'sawtooth');
+  tone(415,.35,.12,'square',.1);
+  tone(523,.4,.1,'sine',.2);
+}
+function snd_win(){
+  [523,659,784,1047].forEach((f,i)=>{tone(f,.35,.18,'triangle',i*.12);});
+}
+function snd_lose(){
+  [392,330,262].forEach((f,i)=>{tone(f,.4,.14,'sine',i*.15);});
+}
+function snd_coat(){
+  [523,659,784,880,1047,1319].forEach((f,i)=>{tone(f,.5,.2,'triangle',i*.1);});
+}
+function snd_reset(){
+  tone(660,.15,.1,'sine');
+  tone(440,.2,.08,'sine',.1);
+}
+function snd_deal(){noise(.06,120,.2);}
+
+/* Sound events must reach every device in a multiplayer room, not just
+   the host (the host is the only device that actually runs the game
+   logic where these were originally called directly). SND() plays the
+   sound locally AND — if we're the host — broadcasts a tiny 'sound'
+   message so every connected client plays the same sound in real time.
+   Client devices never call SND() themselves (they don't run game
+   logic), they just play whatever sound name the host sends them. */
+const SNDMAP={card:snd_card,sweep:snd_sweep,collect:snd_collect,ten:snd_ten,
+  trump:snd_trump,win:snd_win,lose:snd_lose,coat:snd_coat,reset:snd_reset,deal:snd_deal};
+function playSndByName(name){const f=SNDMAP[name];if(f)f();}
+function SND(name){
+  playSndByName(name);
+  if(typeof NET!=='undefined'&&NET.mode==='host') NET.broadcast({type:'sound',name});
+}
+
+/* ══════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════ */
+const SUITS=['♠','♥','♣','♦'];
+const SNAME={'♠':'Spades','♥':'Hearts','♦':'Diamonds','♣':'Clubs'};
+let DIFFICULTY=2; // 1=Easy 2=Medium 3=Hard
+const DIFFNAMES=['','Easy','Medium','Hard'];
+const DIFFICONS=['','🟢','⚡','🔥'];
+const RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const RV={};RANKS.forEach((r,i)=>RV[r]=i+2);
+const RED=new Set(['♥','♦']);
+const TEAM=[0,1,0,1];   // p0=You p1=Left p2=Top(partner) p3=Right
+const PNAME=['You','Player B1','Player A2','Player B2'];
+const SB_ID=['sb-btm','sb-left','sb-top','sb-right'];
+const NM_ID=['nm0','nm1','nm2','nm3'];
+
+/* ══════════════════════════════════════
+   DECK / UTILS
+══════════════════════════════════════ */
+function mkDeck(){
+  const d=[];
+  for(const s of SUITS)for(const r of RANKS)d.push({s,r,id:r+s});
+  return d;
+}
+function shuffle(a){
+  const b=[...a];
+  for(let i=b.length-1;i>0;i--){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}
+  return b;
+}
+function beats(c,d,lead,trump){
+  if(!d)return true;
+  const ct=c.s===trump,dt=d.s===trump;
+  if(ct&&!dt)return true;if(!ct&&dt)return false;
+  if(!ct&&!dt){
+    if(c.s!==lead&&d.s===lead)return false;
+    if(c.s===lead&&d.s!==lead)return true;
+    if(c.s!==lead&&d.s!==lead)return false;
+  }
+  return RV[c.r]>RV[d.r];
+}
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let G=null;
+let DEALT_ANIM_PENDING=false; // set true right after a fresh deal; consumed once by renderArc
+
+/* ── Room coat history (item 13) ──
+   Canonical [TeamA,TeamB] coat counts for the lifetime of this room.
+   Lives only in memory (purged when the room closes), incremented by
+   the host in endHand() and broadcast to every client so it's visible
+   to all players at all times, not just at game-end. */
+let ROOMCOAT=[0,0];
+function updateRoomCoatUI(counts){
+  ROOMCOAT=counts;
+  const el=document.getElementById('rb-coats');
+  if(!el) return;
+  // Rotate into this viewer's own Team-A(=mine)/Team-B(=theirs) framing,
+  // same convention the rest of the table UI already uses.
+  const mySeat=(NET.mode==='client'&&NET.mySeat!=null)?NET.mySeat:0;
+  const mine=rotTeamArr(mySeat,counts);
+  el.innerHTML='<span class="coatpill"><span class="cp-crown">\uD83D\uDC51</span><span class="cp-a">A '+mine[0]+'</span><span class="cp-b">B '+mine[1]+'</span></span>';
+}
+
+/* ── Cross-game starter rotation (item 14) ──
+   Canonical seat that leads the very first trick of the next hand.
+   0=A1,1=B1,2=A2,3=B2 (matches SEAT_TEAMPOS). Game 1 always starts A1;
+   after that, the winning team's position (1 or 2) becomes the next
+   starter, and a COAT flips that position while a plain win keeps it
+   the same as whoever just started. */
+let STARTER_SEAT=0;
+function nextStarterSeat(curSeat,winTeamIdx,isCoat){
+  const curPos=(curSeat===0||curSeat===1)?1:2;
+  const nextPos=isCoat?(curPos===1?2:1):curPos;
+  const seatMap={0:{1:0,2:2},1:{1:1,2:3}};
+  return seatMap[winTeamIdx][nextPos];
+}
+
+function newGame(){
+  if(NET.mode==='client'){closeModal();NET.send({type:'reqNewGame'});info('Waiting for host to start a new hand...');return;}
+  closeModal();
+  if(G&&G.revTimer)clearInterval(G.revTimer);
+  const d=shuffle(mkDeck());
+  G={
+    hands:[[],[],[],[]],
+    initHands:[[],[],[],[]],   // snapshot of each player's starting hand (after deal8)
+    phase:'deal5',
+    trump:null,trumpBy:-1,
+    cur:0,trick:[],
+    revealPending:false,   // true: trump opened but trick not yet complete
+    revCards:[],revTimer:null,
+    heapBuf:[],heapN:0,prevW:-1,firstH:true,heapHasTen:false,
+    firstTenCollected:false, // no heap may be collected until a ten has ever been captured this hand
+    tTricks:[0,0],tTens:[0,0],
+    wonIds:new Set(),hCounts:[0,0],tTenCards:[[],[]],  // suits of collected tens per team
+    first5:[[],[],[],[]],rem:[],
+    gameOver:false,sel:-1,
+    log:[],               // full trick log with hand snapshots
+    lastTrickW:-1,
+    pendingBuf:0,
+    // Inference tables for AI
+    voids:[[],[],[],[]],   // voids[p] = suits player is known void in
+    seenCards:new Set(),   // all cards played/revealed so far
+    handSnaps:[[],[],[],[]], // snapshot before each trick (for history)
+  };
+  for(let i=0;i<5;i++)for(let p=0;p<4;p++){
+    const c=d.pop();
+    G.hands[p].push(c);
+    G.first5[p].push({...c});
+  }
+  G.rem=[...d];
+  // Whoever the starter-rotation (item 14) says should lead this hand —
+  // canonical seat translated into this device's own local numbering.
+  G.cur=toLocalSeat(STARTER_SEAT);
+  sortAll();resetUI();DEALT_ANIM_PENDING=true;render();
+  info('5 cards dealt — play until trump is opened!');
+  maybeAI(1000);
+}
+
+function resetUI(){
+  clearSlots();clearHeaps();clearBuf();
+  document.getElementById('revstrip').classList.remove('show');
+  const tb=document.getElementById('tbadge');
+  tb.textContent='?';tb.classList.remove('on');tb.style.color='';
+  document.getElementById('tlbl').textContent='No Trump';
+  for(let i=0;i<4;i++){
+    document.getElementById('pu'+i).classList.remove('won');
+    document.getElementById('pt'+i).classList.remove('won');
+  }
+  document.getElementById('histbtn').style.display='none';
+}
+function sortAll(){
+  for(let p=0;p<4;p++)
+    G.hands[p].sort((a,b)=>SUITS.indexOf(a.s)-SUITS.indexOf(b.s)||RV[a.r]-RV[b.r]);
+}
+
+/* ══════════════════════════════════════
+   LEGAL MOVES
+══════════════════════════════════════ */
+function getOk(p){
+  const h=G.hands[p],ok=new Set();
+  if(G.trick.length===0){h.forEach((_,i)=>ok.add(i));return ok;}
+  const lead=G.trick[0].card.s;
+  const canFollow=h.some(c=>c.s===lead);
+  if(canFollow){h.forEach((c,i)=>{if(c.s===lead)ok.add(i);});}
+  else{h.forEach((_,i)=>ok.add(i));}
+  return ok;
+}
+
+/* ══════════════════════════════════════
+   PLAY
+══════════════════════════════════════ */
+function tapCard(i){
+  if(G.cur!==0||G.gameOver)return;
+  if(isAISeat(0)){ fmsg('AI is playing for you — tap \u22EE to take back control'); return; }
+  const ok=getOk(0);
+  if(!ok.has(i)){
+    fmsg(G.trick.length>0?'Must play a '+SNAME[G.trick[0].card.s]+' card!':'Cannot play that');
+    return;
+  }
+  if(G.sel===i){
+    if(NET.mode==='client'){
+      NET.send({type:'play',cardId:G.hands[0][i].id});
+      G.sel=-1;renderArc();info('Card sent...');
+      return;
+    }
+    doPlay(0,i);return;
+  }
+  G.sel=i;renderArc();
+}
+
+function doPlay(p,idx){
+  clearTurnTimer(); // a card was just played — any pending 120s timeout for this turn is moot
+  // Snapshot hand before playing for history
+  if(G.trick.length===0){
+    G.handSnaps[p]=[...G.hands[p].map(c=>({...c}))];
+  }
+
+  const card=G.hands[p].splice(idx,1)[0];
+  G.sel=-1;
+  G.seenCards.add(card.id);
+  SND('card');
+
+  // Update void tracking: if player couldn't follow lead but played something else
+  if(G.trick.length>0){
+    const lead=G.trick[0].card.s;
+    if(card.s!==lead){
+      // Player is void in lead suit (they couldn't follow)
+      if(!G.voids[p].includes(lead))G.voids[p].push(lead);
+    }
+  }
+
+  // Trump opening detection
+  if(!G.trump&&G.trick.length>0){
+    const lead=G.trick[0].card.s;
+    if(card.s!==lead){
+      G.trump=card.s;G.trumpBy=p;
+      G.revCards=G.hands[p].filter(c=>G.first5[p].some(f=>f.id===c.id));
+      G.revealPending=true;  // show reveal AFTER trick completes
+      fmsg(PNAME[p]+' opens TRUMP '+G.trump+'!');
+      SND('trump');
+      updateTrumpUI();
+    }
+  }
+
+  G.trick.push({p,card});
+
+  const sb=document.getElementById(SB_ID[p]);
+  sb.innerHTML='';sb.classList.add('hascard');
+  sb.appendChild(mkCard(card,'played cin'));
+
+  if(G.trick.length===4){
+    if(NET.mode==='host'){applyPNAMEHost();broadcastState();}
+    setTimeout(resolve,1100);
+  } else {
+    G.cur=(G.trick[G.trick.length-1].p+1)%4;
+    render();
+    maybeAI(900+Math.random()*600);
+  }
+}
+
+/* ══════════════════════════════════════
+   RESOLVE TRICK
+══════════════════════════════════════ */
+function resolve(){
+  const lead=G.trick[0].card.s;
+  let best=G.trick[0];
+  for(let i=1;i<4;i++)if(beats(G.trick[i].card,best.card,lead,G.trump))best=G.trick[i];
+  const W=best.p;
+  const hasTen=G.trick.some(t=>t.card.r==='10');
+  const trickTens=G.trick.filter(t=>t.card.r==='10').map(t=>t.card);
+
+  // Glow 10s immediately
+  G.trick.forEach(t=>{
+    if(t.card.r==='10'){
+      const ce=document.getElementById(SB_ID[t.p]).querySelector('.card');
+      if(ce){ce.classList.add('ten-glow');SND('ten');}
+    }
+  });
+
+  // Animate winner after short pause
+  setTimeout(()=>{
+    const winSb=document.getElementById(SB_ID[W]);
+    const winCe=winSb?winSb.querySelector('.card'):null;
+    if(winCe){
+      winCe.classList.add('winner');
+      const lbl=document.createElement('div');
+      lbl.textContent='★ '+PNAME[W];
+      lbl.style.cssText='position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);font-size:8px;color:var(--gl);font-family:Cinzel,serif;white-space:nowrap;pointer-events:none;z-index:60;text-shadow:0 0 10px rgba(201,149,42,.9);';
+      winSb.style.position='relative';
+      winSb.appendChild(lbl);
+    }
+  },450);
+
+  // Is this the trump-opening trick? (triggers deal8 after)
+  const isDeal8Trick=G.trump&&G.phase==='deal5'&&G.rem.length>0;
+
+  // Double-Sir logic — compute BEFORE log push so all vars are available
+  const wasFirst=G.firstH;
+  let collected=false;
+  // 10-reset: only fires in non-deal8 tricks
+  const tenResetsNow=hasTen&&!G.heapHasTen&&!isDeal8Trick;
+
+  // Log trick with full hand snapshots
+  G.log.push({
+    trickN:G.log.length+1,
+    plays:[...G.trick.map(t=>({p:t.p,card:{...t.card}}))],
+    winner:W,
+    tens:trickTens.map(c=>({...c})),
+    snapshots:G.handSnaps.map((s,p2)=>{
+      if(s.length)return s;
+      const played=G.trick.find(t=>t.p===p2);
+      return played?[played.card,...G.hands[p2].map(c=>({...c}))]:[...G.hands[p2].map(c=>({...c}))];
+    }),
+    phase:G.phase,
+    heapCtx:{
+      wasFirst,prevW:G.prevW,heapN:G.heapN,
+      heapHasTen:G.heapHasTen,tenResetsNow,
+      collected:false,collectedBy:-1, // updated below if heap collected
+    },
+    scoreSnap:{tTens:[...G.tTens],tTricks:[...G.tTricks]},
+    trump:G.trump,trumpBy:G.trumpBy,
+  });
+  G.lastTrickW=W;
+
+  // Track secondary reveal players BEFORE clearing trick
+  let _secRevPlayers=[];
+  if(G.revealPending&&G.trick.length>0){
+    const rLead=G.trick[0].card.s;
+    _secRevPlayers=G.trick
+      .filter(t=>t.p!==G.trumpBy&&t.card.s!==rLead)
+      .map(t=>t.p);
+  }
+
+  // Add to heap buffer then clear trick
+  G.heapBuf.push(...G.trick.map(t=>t.card));
+  G.trick=[];
+
+  // Show reveal AFTER trick completes (if pending)
+  if(G.revealPending){
+    G.revealPending=false;
+    triggerReveal(_secRevPlayers);
+  }
+
+  console.log(`RESOLVE trick#${G.log.length} W=${PNAME[W]} wasFirst=${wasFirst} prevW=${G.prevW<0?'none':PNAME[G.prevW]} heapN=${G.heapN} hasTen=${hasTen} tenResetsNow=${tenResetsNow} heapHasTen=${G.heapHasTen}`);
+
+  if(wasFirst){
+    G.heapN++;G.prevW=W;G.firstH=false;
+    if(tenResetsNow){
+      // 10 resets the heap ONCE — but the winner of THIS trick is still prevW.
+      // The very next trick they win consecutively collects the whole heap.
+      // DO NOT reset prevW to -1 or firstH to true — that would wrongly demand
+      // a 3rd consecutive win. Just mark heapHasTen to prevent another reset.
+      G.heapHasTen=true;
+      fmsg(PNAME[W]+' wins (10 resets — one more to collect!)');SND('reset');
+    } else {
+      if(hasTen&&isDeal8Trick) G.heapHasTen=true;
+      fmsg(PNAME[W]+' wins — needs one more!');
+    }
+    sweepTrickToBuffer();
+  } else {
+    const heapHasAnyTen=G.heapBuf.some(c=>c.r==='10');
+    if(W===G.prevW&&!tenResetsNow&&!(!G.firstTenCollected&&!heapHasAnyTen)){
+      // SAME PERSON wins consecutive, no 10-reset — collect heap
+      G.heapN++;
+      const team=TEAM[W];
+      G.tTricks[team]+=G.heapN;
+      G.heapBuf.forEach(c=>{
+        if(c.r==='10'&&!G.wonIds.has(c.id)){G.wonIds.add(c.id);G.tTens[team]++;G.tTenCards[team].push(c.s);}
+      });
+      G.hCounts[team]+=G.heapN;
+      G.firstTenCollected=true; // first bankable heap always contains a ten by the check above
+      const hn=G.heapN;
+      setTimeout(()=>{collectHeapVisual(team,hn);SND('collect');fmsg(PNAME[W]+' collects '+hn+' tricks! 🎉'+(hasTen?' (+ten!)':''));},350);
+      G.heapN=0;G.prevW=-1;G.firstH=true;G.heapBuf=[];G.heapHasTen=false;
+      collected=true;
+      // Update log entry with collection info
+      if(G.log.length>0){const le=G.log[G.log.length-1];if(le.heapCtx){le.heapCtx.collected=true;le.heapCtx.collectedBy=W;}}
+      updateHeapTens();sweepAndCollect();
+      // COAT — this team just captured all four tens. The hand ends
+      // immediately here rather than playing out the remaining cards.
+      if(G.tTens[team]===4){
+        setTimeout(()=>{sortAll();render();endHand();},1700);
+        return;
+      }
+    } else if(W===G.prevW&&!tenResetsNow){
+      // Would normally collect, but house rule: the first heap of the
+      // hand can't be banked until it has a ten in it — keep it going.
+      G.heapN++;G.prevW=W;G.firstH=false;
+      fmsg(PNAME[W]+' wins — heap needs a ten before it can be collected ('+G.heapN+' tricks pending)');
+      sweepTrickToBuffer();
+    } else {
+      // Either: different person wins, OR same person wins but 10-reset fires
+      // In both cases: W becomes new prevW, needs one more consecutive win
+      G.heapN++;G.prevW=W;
+      if(tenResetsNow){
+        // 10 resets the heap — W must win ONE more trick to collect
+        // (whether W===old prevW or not doesn't matter — the 10 resets the "consecutive" requirement)
+        G.firstH=false;
+        G.heapHasTen=true;
+        fmsg(PNAME[W]+' wins (10 resets — one more to collect!)');SND('reset');
+      } else {
+        G.firstH=false;
+        fmsg(PNAME[W]+' wins — heap now '+G.heapN);
+      }
+      sweepTrickToBuffer();
+    }
+  }
+
+  // Deal 8 if trump just opened
+  if(isDeal8Trick){
+    // Set cur to trick winner BEFORE deal8 so aiGo targets correct player
+    G.cur=W;
+    setTimeout(()=>{deal8();clearSlots();clearBuf();render();maybeAI(900+Math.random()*500);},2500);
+    return;
+  }
+  // Hand over
+  if(G.hands.every(h=>h.length===0)){
+    if(G.heapN>0){
+      const team=TEAM[W];
+      G.tTricks[team]+=G.heapN;
+      G.heapBuf.forEach(c=>{if(c.r==='10'&&!G.wonIds.has(c.id)){G.wonIds.add(c.id);G.tTens[team]++;G.tTenCards[team].push(c.s);}});
+      G.hCounts[team]+=G.heapN;
+      setTimeout(()=>collectHeapVisual(team,G.heapN),300);
+      G.heapN=0;G.heapBuf=[];G.heapHasTen=false;
+    }
+    setTimeout(()=>{sortAll();render();endHand();},2100);
+    return;
+  }
+
+  G.cur=W;
+  setTimeout(()=>{
+    clearSlots();updateHeapArrow();sortAll();render();
+    maybeAI(800+Math.random()*700);
+  },collected?2500:2300);
+}
+
+/* ══════════════════════════════════════
+   SWEEPS
+══════════════════════════════════════ */
+function sweepTrickToBuffer(){
+  G.pendingBuf++;
+  updateBufTens();
+  setTimeout(()=>{
+    SND('sweep');
+    SB_ID.forEach(id=>{const c=document.getElementById(id).querySelector('.card');if(c)c.classList.add('sweep');});
+    setTimeout(()=>{clearSlots();renderBuf();},520);
+  },1350);
+}
+function sweepAndCollect(){
+  setTimeout(()=>{
+    SND('sweep');
+    SB_ID.forEach(id=>{const c=document.getElementById(id).querySelector('.card');if(c)c.classList.add('sweep');});
+    setTimeout(()=>{clearSlots();clearBuf();render();},520);
+  },1350);
+}
+function renderBuf(){
+  const buf=document.getElementById('trickbuf');buf.innerHTML='';
+  const n=Math.min(G.pendingBuf,7);
+  for(let i=0;i<n;i++){
+    const c=document.createElement('div');c.className='bufcard';
+    c.style.cssText='top:'+(i*3)+'px;left:'+(i*2)+'px;z-index:'+i+';transform:rotate('+((Math.random()-.5)*16)+'deg);';
+    buf.appendChild(c);
+  }
+}
+function clearBuf(){G.pendingBuf=0;document.getElementById('trickbuf').innerHTML='';}
+
+/* ══════════════════════════════════════
+   DEAL 8
+══════════════════════════════════════ */
+function deal8(){
+  const rem=shuffle(G.rem);G.rem=[];
+  for(let i=0;i<8;i++)for(let p=0;p<4;p++)if(rem.length){
+    const c=rem.pop();G.hands[p].push(c);
+    SND('deal');
+  }
+  G.phase='main';sortAll();
+  // G.cur was already set to the WINNER of the trump-revealing trick
+  // (not necessarily G.trumpBy — someone else may have played a bigger
+  // trump card and won it). Do not overwrite it here.
+  // Snapshot full hands now for history
+  G.initHands=G.hands.map(h=>h.map(c=>({...c})));
+  DEALT_ANIM_PENDING=true;
+  info(PNAME[G.cur]+' won that trick — plays first!');
+}
+
+/* ══════════════════════════════════════
+   END HAND
+══════════════════════════════════════ */
+function endHand(){
+  G.gameOver=true;G.phase='over';
+  const u=G.tTens[0],t=G.tTens[1];
+  const ut=G.tTricks[0],tt=G.tTricks[1];
+  let iWon=null,isCoat=false,isDraw=false;
+  if(u===4){iWon=true;isCoat=true;SND('coat');}
+  else if(t===4){iWon=false;isCoat=true;SND('coat');}
+  else if(u>t){iWon=true;SND('win');}
+  else if(t>u){iWon=false;SND('lose');}
+  else{
+    if(ut>tt){iWon=true;SND('win');}
+    else if(tt>ut){iWon=false;SND('lose');}
+    else{isDraw=true;SND('sweep');}
+  }
+  // ── Room coat history (item 13) — canonical team A/B counter that
+  // persists for as long as this room stays open, purged when it closes.
+  if(NET.mode==='host'&&isCoat){
+    ROOMCOAT[u===4?0:1]++;
+    NET.broadcast({type:'roomCoat',counts:ROOMCOAT});
+    updateRoomCoatUI(ROOMCOAT);
+  }
+  // ── Next game's starter (item 14) ──
+  if(NET.mode==='host'||NET.mode==='offline'){
+    const winTeamIdx=isDraw?null:(iWon?0:1);
+    if(winTeamIdx!=null) STARTER_SEAT=nextStarterSeat(STARTER_SEAT,winTeamIdx,isCoat);
+  }
+  let title;
+  if(isDraw){title='Draw!';}
+  else{
+    title=iWon?(isCoat?'\uD83C\uDF89 TEAM A WINS \u2014 COAT! \uD83D\uDC51':'\uD83C\uDFC6 TEAM A WINS!'):(isCoat?'\uD83D\uDC51 TEAM B WINS \u2014 COAT!':'\uD83C\uDFC6 TEAM B WINS!');
+  }
+  updateHeapTens();render();
+  document.getElementById('histbtn').style.display='inline-block';
+  const coat=isCoat?'<div class="big">\uD83D\uDC51</div><div style="color:var(--gl);font-family:Cinzel;font-size:13px;letter-spacing:1px;margin-bottom:8px">COAT \u2014 ALL 4 TENS CAPTURED!</div>':(!isDraw?'<div class="big">\uD83C\uDF89</div>':'');
+  const body=coat+'<div class="scorerow"><div class="scorebox'+(iWon===true?' win':'')+'"><div class="sbt">Team A</div><div class="sbn">'+u+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+ut+' tricks</div></div><div class="scorebox'+(iWon===false?' win':'')+'"><div class="sbt">Team B</div><div class="sbn">'+t+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+tt+' tricks</div></div></div>';
+  showModal(title,body,NET.mode==='client'?[{lbl:'View History',fn:()=>{closeModal();showHist();}}]:[{lbl:'View History',fn:()=>{closeModal();showHist();}},{lbl:'New Game',fn:newGame}],true);
+  if(NET.mode==='host')NET.broadcast({type:'modal',title,body});
+}
+
+/* ══════════════════════════════════════
+   TRUMP REVEAL
+══════════════════════════════════════ */
+let revSec=0;
+function triggerReveal(secPlayers=[]){
+  // Intentionally a no-op: players' cards are never shown to others.
+  // (Previously this displayed the trump-opener's — and any void
+  // players' — cards in a strip at the top of the screen for 30s.)
+  const strip=document.getElementById('revstrip');
+  if(strip) strip.classList.remove('show');
+}
+
+/* ══════════════════════════════════════
+   HEAP VISUALS
+══════════════════════════════════════ */
+function clearHeaps(){
+  G.hCounts=[0,0];
+  ['huscnt','htmcnt','harr-us','harr-tm'].forEach(id=>{document.getElementById(id).textContent='';});
+  document.getElementById('huscnt').textContent='0 tricks';
+  document.getElementById('htmcnt').textContent='0 tricks';
+  ['htens-us','htens-tm'].forEach(id=>{document.getElementById(id).innerHTML='';});
+}
+function collectHeapVisual(team,n){
+  const cnt=document.getElementById(team===0?'huscnt':'htmcnt');
+  cnt.textContent=G.hCounts[team]+' tricks';
+  cnt.classList.add('pop');setTimeout(()=>cnt.classList.remove('pop'),400);
+}
+function updateHeapArrow(){
+  if(G.lastTrickW<0)return;
+  const team=TEAM[G.lastTrickW];
+  const arrows={0:'⬇',1:'⬅',2:'⬆',3:'➡'};
+  const arrow=arrows[G.lastTrickW]+''+PNAME[G.lastTrickW];
+  document.getElementById('harr-us').textContent=team===0?arrow:'';
+  document.getElementById('harr-tm').textContent=team===1?arrow:'';
+  updateHeapTens();
+}
+function updateHeapTens(){
+  [0,1].forEach(team=>{
+    const el=document.getElementById(team===0?'htens-us':'htens-tm');
+    const suits=G.tTenCards[team];
+    el.innerHTML=suits.map(s=>{
+      const isRed=RED.has(s);
+      return '<span class="htpip" style="color:'+(isRed?'#ff8080':'var(--gl)')+'">10'+s+'</span>';
+    }).join('');
+  });
+  // Update current heap buffer tens
+  updateBufTens();
+}
+function updateBufTens(){
+  const el=document.getElementById('curbuf-tens');
+  if(!el||!G) return;
+  const bufTens=G.heapBuf.filter(c=>c.r==='10'&&!G.wonIds.has(c.id));
+  if(bufTens.length===0){el.innerHTML='';return;}
+  el.innerHTML=bufTens.map(c=>{
+    const isRed=RED.has(c.s);
+    return '<span class="buften" style="color:'+(isRed?'#ff8080':'#ffe080')+'">10'+c.s+'</span>';
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   TRUMP UI
+══════════════════════════════════════ */
+function updateTrumpUI(){
+  if(!G.trump)return;
+  const b=document.getElementById('tbadge');
+  b.textContent=G.trump;b.classList.add('on');
+  b.style.color=RED.has(G.trump)?'#e74c3c':'#f0f0f0';
+  document.getElementById('tlbl').textContent=SNAME[G.trump];
+}
+
+/* ══════════════════════════════════════
+   BUILD CARD ELEMENT
+══════════════════════════════════════ */
+function mkCard(card,cls=''){
+  const el=document.createElement('div');
+  const isRed=RED.has(card.s);
+  const isTen=card.r==='10';
+  const isTrump=G&&G.trump&&card.s===G.trump;
+  el.className='card '+(isRed?'red':'black')+(isTen?' ten':'')+(isTrump?' trp':'')+' '+cls;
+  el.innerHTML=
+    '<div><div class="cr">'+card.r+'</div><div class="cs">'+card.s+'</div></div>'+
+    '<div class="cc">'+card.s+'</div>'+
+    '<div style="transform:rotate(180deg)"><div class="cr">'+card.r+'</div><div class="cs">'+card.s+'</div></div>';
+  return el;
+}
+
+/* ══════════════════════════════════════
+   HISTORY PANEL
+══════════════════════════════════════ */
+function showHist(){
+  const panel=document.getElementById('histpanel');
+  const content=document.getElementById('histcontent');
+  content.innerHTML='';
+  if(!G||!G.log||!G.log.length){
+    content.innerHTML='<p style="color:rgba(255,255,255,.35);text-align:center;font-size:12px">No tricks yet.</p>';
+    panel.classList.add('open');return;
+  }
+
+  // Show full initial hands
+  const initDiv=document.createElement('div');
+  initDiv.style.cssText='background:rgba(255,255,255,.03);border:1px solid rgba(201,149,42,.12);border-radius:8px;padding:8px 10px;margin-bottom:12px;';
+  initDiv.innerHTML='<div style="font-family:Cinzel,serif;font-size:9px;color:var(--gd);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Starting Hands (after deal)</div>';
+  PNAME.forEach((name,p)=>{
+    const hand=G.initHands[p];
+    if(!hand||!hand.length)return;
+    const row=document.createElement('div');
+    row.style.cssText='margin-bottom:4px;';
+    const sortedHand=[...hand].sort((a,b)=>SUITS.indexOf(a.s)-SUITS.indexOf(b.s)||RV[a.r]-RV[b.r]);
+    const cardSpans=sortedHand.map(c=>{
+      const isR=RED.has(c.s);
+      const isTen=c.r==='10';
+      return '<span style="display:inline-block;margin:1px 2px;padding:1px 3px;border-radius:3px;font-size:9px;font-family:Cinzel,serif;font-weight:700;color:'+(isR?'#e04040':'#eee')+(isTen?';border:1px solid var(--gold);background:rgba(201,149,42,.12)':';border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04)')+'">'+(c.r+c.s)+'</span>';
+    }).join('');
+    row.innerHTML='<span style="font-family:Cinzel,serif;font-size:8px;color:rgba(255,255,255,.4);display:inline-block;width:40px">'+name+':</span>'+cardSpans;
+    initDiv.appendChild(row);
+  });
+  content.appendChild(initDiv);
+
+  G.log.forEach(entry=>{
+    const row=document.createElement('div');row.className='trick-row';
+    const tenStr=entry.tens.length?' &#x1F4B0;&times;'+entry.tens.length:'';
+    row.innerHTML='<div class="tr-hdr"><span>Trick #'+entry.trickN+tenStr+'</span><span class="winner-tag">&#x2605; '+PNAME[entry.winner]+'</span></div>';
+
+    // Cards played
+    const cards=document.createElement('div');cards.className='trick-cards';
+    entry.plays.forEach(play=>{
+      const isRed=RED.has(play.card.s);
+      const isTen=play.card.r==='10';
+      const isTrump=G.trump&&play.card.s===G.trump;
+      const isWinner=play.p===entry.winner;
+      const tc=document.createElement('div');tc.className='tc';
+      tc.innerHTML=
+        '<div class="tc-card '+(isRed?'red':'black')+(isTen?' is-ten':'')+(isTrump?' is-trump':'')+(isWinner?' is-winner':'')+'">'+
+          '<div>'+play.card.r+'</div>'+
+          '<div class="suit-big">'+play.card.s+'</div>'+
+          '<div style="transform:rotate(180deg)">'+play.card.r+'</div>'+
+        '</div>'+
+        '<div class="tc-who">'+PNAME[play.p]+(isWinner?' ★':'')+'</div>';
+      cards.appendChild(tc);
+    });
+    row.appendChild(cards);
+
+    // Hand snapshot
+    if(entry.snapshots){
+      const snapDiv=document.createElement('div');
+      snapDiv.style.cssText='margin-top:6px;padding-top:5px;border-top:1px solid rgba(255,255,255,.06);';
+      snapDiv.innerHTML='<div class="hand-snap-header">Hand at start of trick:</div>';
+      entry.snapshots.forEach((snap,p2)=>{
+        if(!snap||!snap.length)return;
+        const sorted=[...snap].sort((a,b)=>SUITS.indexOf(a.s)-SUITS.indexOf(b.s)||RV[a.r]-RV[b.r]);
+        const line=document.createElement('div');
+        line.style.cssText='font-size:7px;color:rgba(255,255,255,.25);margin-bottom:2px;line-height:1.6;';
+        const playedCard=entry.plays.find(pl=>pl.p===p2);
+        const cardSpans=sorted.map(c=>{
+          const isR=RED.has(c.s);
+          const isPlayed=playedCard&&c.id===playedCard.card.id;
+          const isTen=c.r==='10';
+          return '<span style="display:inline-block;margin:1px;padding:0 2px;border-radius:2px;font-family:Cinzel,serif;font-size:7px;color:'+(isR?'#e04040':'#ccc')+(isPlayed?';background:rgba(201,149,42,.25);border:1px solid var(--gold)':isTen?';border:1px solid rgba(201,149,42,.3)':';opacity:.7')+'">'+(c.r+c.s)+'</span>';
+        }).join('');
+        line.innerHTML='<span style="display:inline-block;width:36px;font-family:Cinzel,serif">'+PNAME[p2]+':</span>'+cardSpans;
+        snapDiv.appendChild(line);
+      });
+      row.appendChild(snapDiv);
+    }
+    content.appendChild(row);
+  });
+  panel.classList.add('open');
+}
+function closeHist(){document.getElementById('histpanel').classList.remove('open');}
+
+/* ═══ DOWNLOAD HISTORY AS TEXT ═══ */
+function downloadHistory(){
+  if(!G||!G.log||!G.log.length){alert('No game history yet.');return;}
+  const L=[];
+  const ts=new Date().toLocaleString();
+  const trump=G.trump?G.trump+' ('+SNAME[G.trump]+')':'None';
+  const trumpOpener=G.trumpBy>=0?PNAME[G.trumpBy]:'—';
+  const [a0,a1]=G.tTens, [b0,b1]=G.tTricks;
+
+  L.push('══════════════════════════════════════════════════════');
+  L.push('  DEHLA PAKAD — GAME LOG   '+ts);
+  L.push('══════════════════════════════════════════════════════');
+  L.push('Teams   : You(0)+Top(2) = Team A   |   Left(1)+Right(3) = Team B');
+  L.push('Trump   : '+trump+'  opened by '+trumpOpener);
+  L.push('Result  : Team A = '+a0+' tens, '+b0+' tricks   |   Team B = '+a1+' tens, '+b1+' tricks');
+  const winner=a0>a1?'Team A':a1>a0?'Team B':b0>=b1?'Team A':'Team B';
+  L.push('Winner  : '+winner+(a0===4||a1===4?' ★ COAT':''));
+  L.push('');
+
+  // Starting hands
+  L.push('──────────────────────────────────────────────────────');
+  L.push('STARTING HANDS (full 13-card deal):');
+  const startH=G.initHands&&G.initHands.some(h=>h.length)
+    ?G.initHands
+    :(G.log[0]&&G.log[0].snapshots?G.log[0].snapshots:null);
+  if(startH){
+    const roles=['YOU ','LFT ','PTR ','RGT '];
+    const teams=['(TeamA)','(TeamB)','(TeamA)','(TeamB)'];
+    startH.forEach((hand,p)=>{
+      if(!hand||!hand.length) return;
+      // Group by suit for readability
+      const bySuit={};
+      hand.forEach(c=>{if(!bySuit[c.s])bySuit[c.s]=[];bySuit[c.s].push(c);});
+      const suitStr=SUITS.filter(s=>bySuit[s]).map(s=>s+bySuit[s].map(c=>c.r).join('')).join('  ');
+      L.push('  '+roles[p]+teams[p]+'  '+suitStr);
+    });
+  }
+  L.push('');
+
+  // Per-trick
+  L.push('──────────────────────────────────────────────────────');
+  L.push('TRICKS:');
+  L.push('──────────────────────────────────────────────────────');
+
+  G.log.forEach(entry=>{
+    const {trickN,plays,winner:W,tens,snapshots,heapCtx,scoreSnap,trump:tTrump,trumpBy}=entry;
+    const hc=heapCtx||{};
+    const sc=scoreSnap||{tTens:[0,0],tTricks:[0,0]};
+    const hasTen=tens&&tens.length>0;
+    const tenStr=hasTen?'  ★10: '+tens.map(c=>c.r+c.s).join(' '):'';
+    const heapLabel=hc.collected
+      ? '  ✔ HEAP COLLECTED by '+PNAME[hc.collectedBy]
+      : hc.tenResetsNow
+        ? '  ↺ 10-RESET (heap continues)'
+        : hc.wasFirst
+          ? '  [Heap trick #1 — prevW='+PNAME[W]+']'
+          : '  [Heap trick #'+(hc.heapN||'?')+' — prevW='+(hc.prevW>=0?PNAME[hc.prevW]:'none')+']';
+
+    L.push('┌─ TRICK '+trickN+(hasTen?' ★':'')+(entry.phase==='deal5'?' (5-card)':'')
+      +'  Trump='+( tTrump||'none')+'  Score: A='+sc.tTens[0]+'t/'+sc.tTricks[0]+'tr  B='+sc.tTens[1]+'t/'+sc.tTricks[1]+'tr');
+    L.push('│ '+heapLabel);
+
+    // Each play
+    plays.forEach(({p,card})=>{
+      const isWin=p===W;
+      const isTen=card.r==='10'?'[10]':'';
+      const isTrump=tTrump&&card.s===tTrump?'[T]':'';
+      const role=['YOU','LFT','PTR','RGT'][p];
+      const marker=isWin?'►':' ';
+      // Show what hand they had
+      const snap=snapshots&&snapshots[p]?snapshots[p]:[];
+      const handBefore=snap.map(c=>{
+        const played=(c.id===card.id);
+        return played?'['+c.r+c.s+']':c.r+c.s;
+      }).join(' ');
+      L.push('│ '+marker+' '+role+'/'+PNAME[p].padEnd(5)+'  played: '+card.r+card.s+' '+isTen+isTrump+'   hand: '+handBefore);
+    });
+
+    L.push('│ → Winner: '+PNAME[W]+tenStr);
+    L.push('└─────────────────────────────────────────────────');
+    L.push('');
+  });
+
+  L.push('══════════════════════════════════════════════════════');
+
+  const text=L.join('\n');
+  const blob=new Blob([text],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='dehla_pakad_'+Date.now()+'.txt';
+  a.click();URL.revokeObjectURL(url);
+}
+/* ══════════════════════════════════════
+   AI — DEEP STRATEGIC ENGINE v3
+   Core principles:
+   1. Suit control: be the highest in a suit → use that to setup your 10
+   2. Safe-ten lead: lead suit where YOU have the 10 → even if opp wins ace, 10 is safe
+   3. Resource management: never waste high cards unnecessarily
+   4. Partner awareness: don't throw King when partner already has highest card winning
+   5. Second-trick planning: always evaluate "can I win the next trick too?"
+   6. Exhaust short suits to ruff with trump
+   7. Trump opening: use lowest card of a suit where you have ACE (keep ace, reveal cheap)
+   8. Intercept: sacrifice big card when opponent's partner likely has a ten to throw
+══════════════════════════════════════ */
+
+/* ── Utility helpers ── */
+function playedCards(){
+  return [...G.heapBuf,...G.trick.map(t=>t.card)];
+}
+
+function allKnownCards(p){
+  // Cards p knows about: their own hand + everything played
+  return [...G.hands[p],...playedCards()];
+}
+
+function remainingInSuit(suit){
+  const played=playedCards();
+  return RANKS.filter(r=>!played.some(c=>c.id===r+suit)).map(r=>({r,s:suit,id:r+suit}));
+}
+
+function isHighestRemaining(card){
+  const rem=remainingInSuit(card.s);
+  return !rem.some(c=>c.id!==card.id&&RV[c.r]>RV[card.r]);
+}
+
+function isHighestTrump(card){
+  return G.trump&&card.s===G.trump&&isHighestRemaining(card);
+}
+
+// How many cards of a suit remain (excluding what's in my hand)
+function unseenCountInSuit(p,suit){
+  const mine=G.hands[p].filter(c=>c.s===suit).length;
+  return remainingInSuit(suit).length - mine;
+}
+
+// Am I controlling this suit (= highest remaining card of this suit is mine)?
+function iControlSuit(p,suit){
+  const rem=remainingInSuit(suit);
+  if(!rem.length) return false;
+  const highest=rem.reduce((a,b)=>RV[a.r]>RV[b.r]?a:b);
+  return G.hands[p].some(c=>c.id===highest.id);
+}
+
+
+function aiGo(){
+  if(!G||G.cur===0||G.gameOver) return;
+  const p=G.cur;
+  const ok=[...getOk(p)];
+  if(!ok.length){console.warn('aiGo: no legal moves for p='+p);return;}
+  // Think time varies by difficulty
+  const base=DIFFICULTY===1?300:DIFFICULTY===3?500:800;
+  const vary=DIFFICULTY===1?300:DIFFICULTY===3?500:900;
+  const thinkTime=base+Math.random()*vary;
+  setTimeout(()=>{
+    if(!G||G.gameOver) return;
+    if(G.cur!==p) return;
+    const okNow=[...getOk(p)];
+    if(!okNow.length) return;
+    let idx;
+    try{
+      if(DIFFICULTY===1){
+        // EASY: 65% random (prefer non-tens), 35% AI
+        if(Math.random()<0.65){
+          const nonTen=okNow.filter(i=>G.hands[p][i].r!=='10');
+          const pool=nonTen.length?nonTen:okNow;
+          idx=pool[Math.floor(Math.random()*pool.length)];
+        }
+      }
+      if(idx==null){
+        // MEDIUM / HARD: full strategic AI
+        if(!G.trump&&G.trick.length>0){
+          const lead=G.trick[0].card.s;
+          if(!G.hands[p].some(c=>c.s===lead)){
+            idx=chooseTrumpOpenCard(p,lead);
+          }
+        }
+        if(idx==null) idx=aiPick(p,okNow);
+      }
+      if(idx==null||idx<0||idx>=G.hands[p].length) idx=okNow[0];
+    } catch(e){
+      console.error('aiPick error:',e);
+      idx=okNow[0];
+    }
+    doPlay(p,idx);
+  },thinkTime);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DEHLA PAKAD — PROBABILISTIC AI ENGINE v5
+
+   Philosophy: No rule cascades. No hardcoded playbooks.
+   Every legal card is SCORED on multiple probability-weighted dimensions.
+   The bot reasons about what is LIKELY to happen, not what SHOULD happen.
+
+   Core awareness:
+   1. PROBABILITY DISTRIBUTION — for every unseen card, estimate P(each player has it)
+      using confirmed voids + hand sizes. Update every trick.
+
+   2. TEN TRACKING — where are the 4 tens most likely? Compute P(each player has each ten).
+      Every decision is filtered through "how does this affect expected tens for my team?"
+
+   3. SUIT CONTROL — who probably controls each suit (has highest remaining card)?
+      Leading into someone's controlled suit = giving them a win.
+
+   4. HEAP ECONOMICS — what is this heap worth? Spending A♥ on a 2-trick no-ten heap
+      may cost more than it gains. Compare card cost vs heap value before committing.
+
+   5. TEAM PLAY — score considers partner outcomes, not just personal wins.
+      Partner's ten = my team's ten. Help partner collect. Don't block partner.
+
+   6. INTENTIONAL PLAY DETECTION — recognize when a card is a setup move
+      (leading low to create void, throwing ten to partner's guaranteed winner, etc.)
+      and respond accordingly.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────
+   MAIN ENTRY POINT
+────────────────────────────────────────────────────── */
+function aiPick(p,ok){
+  const h=G.hands[p];
+  const wm=buildWorldModel(p);
+  const dist=buildProbDist(p);
+
+  // Score every legal card
+  const scored=ok.map(i=>({i,sc:scorePlay(p,i,h[i],wm,dist)}));
+  scored.sort((a,b)=>b.sc-a.sc);
+
+  // On Hard: always pick best. On Medium/Easy: add noise so top few cards are candidates.
+  // This makes the bot feel less robotic on lower difficulties.
+  const noiseRange = DIFFICULTY===3 ? 0.5 : DIFFICULTY===2 ? 2.5 : 6.0;
+  const topSc = scored[0].sc;
+  const pool = scored.filter(x => x.sc >= topSc - noiseRange);
+  return pool[Math.floor(Math.random()*pool.length)].i;
+}
+
+/* ──────────────────────────────────────────────────────
+   WORLD MODEL — situational facts the bot can compute
+   (kept as foundation; probability distribution is separate)
+────────────────────────────────────────────────────── */
+function buildWorldModel(p){
+  const h=G.hands[p];
+  const partner=(p+2)%4;
+  const opps=[0,1,2,3].filter(x=>TEAM[x]!==TEAM[p]);
+  const myTeam=TEAM[p];
+  const oppTeam=1-myTeam;
+  const handSizes=[0,1,2,3].map(x=>G.hands[x].length);
+
+  const preTrump=!G.trump;
+  const trumpJustRevealed=G.trump&&G.phase==='deal5';
+  const fullGame=G.phase==='main';
+
+  const myTens_score=G.tTens[myTeam];
+  const oppTens_score=G.tTens[oppTeam];
+  const tensInHeap=G.heapBuf.filter(c=>c.r==='10'&&!G.wonIds.has(c.id)).length;
+  const myTensInHand=h.filter(c=>c.r==='10');
+  const myTrumps=G.trump?h.filter(c=>c.s===G.trump):[];
+
+  const heapIsEmpty=G.firstH;
+  const heapTrickCount=G.heapN;
+  const prevWinner=G.prevW;
+  const iWonPrev=prevWinner===p&&!heapIsEmpty;
+  const partnerWonPrev=prevWinner===partner&&!heapIsEmpty;
+  const oppWonPrev=!heapIsEmpty&&prevWinner>=0&&TEAM[prevWinner]===oppTeam;
+  const heapCollectionEnabled=G.trump!==null;
+
+  // What cards remain (not yet seen/played)
+  function remInSuit(s){
+    return RANKS.map(r=>({r,s,id:r+s}))
+      .filter(c=>!G.seenCards.has(c.id)
+               &&!G.trick.some(t=>t.card.id===c.id)
+               &&!G.heapBuf.some(x=>x.id===c.id));
+  }
+  const remaining={};
+  for(const s of SUITS) remaining[s]=remInSuit(s);
+
+  function iHoldHighest(suit){
+    const rem=remaining[suit];
+    if(!rem.length) return false;
+    const best=rem.reduce((a,b)=>RV[a.r]>RV[b.r]?a:b);
+    return h.some(c=>c.id===best.id);
+  }
+
+  function isGuaranteed(card){
+    if(G.trump&&card.s===G.trump){
+      const remT=remaining[G.trump];
+      if(!remT.length) return true;
+      const best=remT.reduce((a,b)=>RV[a.r]>RV[b.r]?a:b,{r:'2',s:G.trump});
+      return h.some(c=>c.id===card.id)&&card.id===best.id||
+        !remT.some(c=>c.id!==card.id&&RV[c.r]>RV[card.r]&&!h.some(x=>x.id===c.id));
+    }
+    const rem=remaining[card.s];
+    return !rem.some(c=>c.id!==card.id&&RV[c.r]>RV[card.r]&&!h.some(x=>x.id===c.id));
+  }
+
+  const unseenTens=SUITS.map(s=>({s,r:'10',id:'10'+s}))
+    .filter(c=>!G.wonIds.has(c.id)&&!G.heapBuf.some(x=>x.id===c.id)
+              &&!h.some(x=>x.id===c.id)&&!G.trick.some(t=>t.card.id===c.id));
+
+  const controlledNonTrump=SUITS.filter(s=>s!==G.trump&&h.some(c=>c.s===s)&&iHoldHighest(s));
+  const canRuff=G.trump&&myTrumps.length>0;
+
+  function probWithOpp(cardId,suit){
+    if(h.some(c=>c.id===cardId)) return 0;
+    const oppSizes=opps.map(x=>G.voids[x].includes(suit)?0:handSizes[x]);
+    const pSize=handSizes[partner];
+    const total=pSize+oppSizes.reduce((a,b)=>a+b,0);
+    if(!total) return 0;
+    return oppSizes.reduce((a,b)=>a+b,0)/total;
+  }
+
+  return {
+    p,h,partner,opps,myTeam,oppTeam,handSizes,
+    preTrump,trumpJustRevealed,fullGame,
+    myTens:myTensInHand,myTrumps,
+    myTens_score,oppTens_score,
+    tensInHeap,
+    heapIsEmpty,heapTrickCount,prevWinner,
+    iWonPrev,partnerWonPrev,oppWonPrev,
+    heapCollectionEnabled,
+    remaining,iHoldHighest,isGuaranteed,probWithOpp,
+    unseenTens,controlledNonTrump,canRuff
+  };
+}
+
+/* ──────────────────────────────────────────────────────
+   PROBABILITY DISTRIBUTION
+   For every card not in my hand and not yet played,
+   estimate P(each player holds it).
+   
+   Method: weight by hand size, zero out confirmed voids.
+   Simple but directionally accurate — it respects everything
+   we've learned from void tracking.
+────────────────────────────────────────────────────── */
+function buildProbDist(p){
+  const h=G.hands[p];
+  // All cards accounted for (mine, played, heaped, won)
+  const placed=new Set([
+    ...h.map(c=>c.id),
+    ...G.trick.map(t=>t.card.id),
+    ...G.heapBuf.map(c=>c.id),
+  ]);
+  G.seenCards.forEach(id=>placed.add(id));
+  G.wonIds.forEach(id=>placed.add(id));
+
+  const dist={};
+  for(const s of SUITS){
+    for(const r of RANKS){
+      const cid=r+s;
+      if(placed.has(cid)) continue; // already known location
+      dist[cid]=[0,0,0,0];
+      let totalW=0;
+      for(let x=0;x<4;x++){
+        if(x===p){dist[cid][x]=0;continue;}
+        const w=G.voids[x].includes(s)?0:G.hands[x].length;
+        dist[cid][x]=w;
+        totalW+=w;
+      }
+      if(totalW>0) for(let x=0;x<4;x++) dist[cid][x]/=totalW;
+    }
+  }
+  return dist;
+}
+
+/* ──────────────────────────────────────────────────────
+   P(player x has a card that legally beats 'against'
+   in a trick with the given lead suit)
+────────────────────────────────────────────────────── */
+function pXBeats(x,against,lead,dist){
+  let pBeat=0;
+  for(const s of SUITS){
+    for(const r of RANKS){
+      const cid=r+s;
+      const card={r,s,id:cid};
+      if(!beats(card,against,lead,G.trump)) continue;
+      // P(x has this card)
+      const pHas=dist[cid]?dist[cid][x]:0;
+      if(pHas<=0) continue;
+      // P(x can legally play it — must follow lead suit if able)
+      let pCanPlay=1.0;
+      if(s!==lead){
+        if(G.voids[x].includes(lead)){
+          pCanPlay=1.0; // confirmed void, can play anything
+        } else {
+          // Estimate P(x has no lead-suit cards remaining)
+          let pHasLead=0;
+          for(const rr of RANKS){
+            const lid=rr+lead;
+            pHasLead+=(dist[lid]&&dist[lid][x])||0;
+          }
+          // Clamp: can't have more than 1 on average per card
+          pCanPlay=Math.max(0,1-Math.min(1,pHasLead));
+        }
+      }
+      pBeat+=pHas*pCanPlay;
+    }
+  }
+  return Math.min(0.97,pBeat);
+}
+
+/* ──────────────────────────────────────────────────────
+   P(card stays winning through all remaining players)
+   Given 'winCard' is currently winning and 'winner' holds it,
+   return P(no remaining player beats it).
+────────────────────────────────────────────────────── */
+function pHoldsThroughRest(winner,winCard,lead,playedSet,myTeam,dist){
+  let pHold=1.0;
+  for(let x=0;x<4;x++){
+    if(playedSet.has(x)) continue;
+    if(TEAM[x]===myTeam) continue; // friendly player can only help
+    pHold*=(1-pXBeats(x,winCard,lead,dist));
+  }
+  return pHold;
+}
+
+/* ──────────────────────────────────────────────────────
+   CORE SCORER — returns a numeric score for playing
+   card at index idx. Higher = better for my team.
+   
+   Score dimensions:
+   A. Expected ten gain: P(team wins trick) * tens_at_stake
+      minus P(opp wins trick) * tens_at_stake
+   B. Heap collection value: P(team collects heap) * heap_size
+   C. Card efficiency: penalty for over-spending high cards
+      when heap value doesn't justify it
+   D. Ten safety: heavy penalty for throwing ten to opponent,
+      bonus for throwing ten to partner's guaranteed win
+   E. Void/setup value: small bonus for plays that create
+      future opportunities (voids, suit exhaustion)
+────────────────────────────────────────────────────── */
+function scorePlay(p,idx,card,wm,dist){
+  const {partner,myTeam,oppTeam,
+         preTrump,trumpJustRevealed,
+         tensInHeap,heapIsEmpty,heapTrickCount,
+         iWonPrev,partnerWonPrev,oppWonPrev,
+         heapCollectionEnabled,isGuaranteed,remaining} = wm;
+
+  const h=G.hands[p];
+  const isLeading=G.trick.length===0;
+  let score=0;
+
+  // ── Heap context ──
+  const heapTens=G.heapBuf.filter(c=>c.r==='10'&&!G.wonIds.has(c.id)).length;
+  const trickTens=G.trick.filter(t=>t.card.r==='10').length;
+  const tensAtStake=heapTens+trickTens+(card.r==='10'?1:0); // include this card if ten
+  const heapTricks=heapTrickCount+(isLeading?0:0); // tricks already in heap
+  // Heap value = 10 pts per ten + 1 pt per trick
+  const heapVal=heapTens*10+heapTricks*0.8;
+
+  // ── Pre-trump: no collection, just conserve ──
+  if(preTrump){
+    // Simple: prefer low non-ten cards. Penalty scales with rank.
+    const rv=RV[card.r]||0;
+    score -= rv*1.2;
+    if(card.r==='10') score-=18; // protect tens before trump is known
+    // Slight bonus for playing cards from long suits (force voids on opponents)
+    const suitLen=h.filter(c=>c.s===card.s).length;
+    if(suitLen>=3) score+=1.5;
+    return score;
+  }
+
+  // ── Trump-reveal trick: conservative, don't burn high cards ──
+  if(trumpJustRevealed){
+    const rv=RV[card.r]||0;
+    score-=rv*0.9;
+    if(card.r==='10') score-=14;
+    if(G.trump&&card.s===G.trump) score-=4; // avoid spending trump prematurely
+    return score;
+  }
+
+  // ── MAIN GAME: full probabilistic scoring ──
+
+  if(isLeading){
+    score+=scoreLead(p,idx,card,wm,dist,heapVal,tensAtStake);
+  } else {
+    score+=scoreFollow(p,idx,card,wm,dist,heapVal,tensAtStake);
+  }
+
+  return score;
+}
+
+/* ──────────────────────────────────────────────────────
+   LEAD SCORING
+   I'm starting a new trick. What's the best card to lead?
+────────────────────────────────────────────────────── */
+function scoreLead(p,idx,card,wm,dist,heapVal,tensAtStake){
+  const {partner,myTeam,oppTeam,
+         iWonPrev,partnerWonPrev,oppWonPrev,
+         heapIsEmpty,heapTrickCount,heapCollectionEnabled,
+         isGuaranteed,iHoldHighest,remaining,myTrumps,unseenTens} = wm;
+
+  const h=G.hands[p];
+  let score=0;
+
+  // ── P(my team wins this trick if I lead this card) ──
+  // P(I win) = P(no opponent beats my card)
+  let pIWin=1.0;
+  for(let x=0;x<4;x++){
+    if(x===p||TEAM[x]===myTeam) continue;
+    pIWin*=(1-pXBeats(x,card,card.s,dist));
+  }
+
+  // P(partner wins even if I lose) — partner might have higher card
+  let pPartnerWin=0;
+  {
+    // Estimate P(partner has a card higher than any opponent can play)
+    // Rough: if partner likely controls this suit
+    const pCtrl=estimateSuitControl(partner,card.s,wm,dist);
+    pPartnerWin=(1-pIWin)*pCtrl*0.6; // partial credit
+  }
+
+  const pTeamWins=Math.min(0.97,pIWin+pPartnerWin);
+  const pOppWins=1-pTeamWins;
+
+  // ── Heap collection probability ──
+  // If I win this trick:
+  //   - if iWonPrev → I collect heap immediately (consecutive wins)
+  //   - if fresh heap (heapIsEmpty) → I'm trick #1, need one more
+  //   - if partner won prev → my win is trick 2, collect!
+  let pTeamCollects=0;
+  let pOppCollects=0;
+
+  if(heapCollectionEnabled){
+    if(iWonPrev){
+      // I won prev, win again → I collect
+      pTeamCollects=pTeamWins*0.92;
+    } else if(partnerWonPrev){
+      // Partner won prev, I need to win → partner already established
+      // Actually in Dehla Pakad, partner winning then me winning does NOT collect
+      // Only SAME PERSON winning twice collects. So this is trick #1 for me.
+      pTeamCollects=pTeamWins*0.38; // need another win after this
+    } else if(heapIsEmpty){
+      pTeamCollects=pTeamWins*0.35; // trick #1, need another
+    } else if(oppWonPrev){
+      // Opp won last — winning this breaks their streak, but I still need one more
+      pTeamCollects=pTeamWins*0.32;
+    }
+
+    // Opponent collection risk
+    if(oppWonPrev){
+      pOppCollects=pOppWins*0.88; // opponent about to collect if they win
+    } else {
+      pOppCollects=pOppWins*0.3;
+    }
+  }
+
+  // A. Expected ten score
+  const currentHeapTens=G.heapBuf.filter(c=>c.r==='10'&&!G.wonIds.has(c.id)).length;
+  const totalTensAtStake=currentHeapTens+(card.r==='10'?1:0);
+  score+=(pTeamCollects-pOppCollects)*totalTensAtStake*10;
+
+  // B. Expected trick score (minor)
+  score+=(pTeamCollects-pOppCollects)*G.heapN*0.6;
+
+  // C. Ten throwing opportunity: if I win, partner (void in this suit) can throw tens
+  if(pTeamWins>0.55&&G.trump){
+    const partnerVoid=G.voids[partner].includes(card.s);
+    const partnerHasTens=G.hands[partner].some(c=>c.r==='10');
+    if(partnerVoid&&partnerHasTens){
+      // Partner will likely throw a ten to me! Big bonus.
+      score+=pTeamWins*8;
+    }
+  }
+
+  // D. Card efficiency penalty — don't over-spend on low-value heaps
+  // How many times can I still use this card profitably if I save it?
+  const cardRV=RV[card.r]||0;
+  const isHighCard=cardRV>=RV['K'];
+  const isTrump=G.trump&&card.s===G.trump;
+  const heapCurrentVal=currentHeapTens*10+G.heapN*0.8;
+
+  if(isHighCard||isTrump){
+    // What is the "opportunity cost" of spending this card now?
+    // High card spent on an empty no-ten heap = wasteful
+    const cardCost=(cardRV-RV['9'])*1.8;
+    const justified=heapCurrentVal+totalTensAtStake*10; // what we gain if it works
+    if(justified<cardCost*pTeamWins){
+      score-=cardCost*(1-pTeamWins)*1.2; // penalty proportional to waste probability
+    }
+    // D2. Conservation — when pTeamWins is already near-certain (e.g. an
+    // uncontested trump lead), the penalty above vanishes since there's
+    // ~nothing to "waste". But if I hold MULTIPLE cards that would each
+    // independently guarantee the win (say A and K of trump with no
+    // higher trump left in play), the bot should still lead the cheaper
+    // one and keep the Ace in hand for a trick where the win isn't
+    // already a lock. This is a small, constant pull toward the lowest
+    // sure-thing card — it only breaks ties among guaranteed winners and
+    // won't override the larger heap-value/collection terms above.
+    if(pTeamWins>0.9) score-=cardRV*0.3;
+  }
+
+  // E. Leading own ten: risky if opponent can beat it
+  if(card.r==='10'){
+    // If I lead ten and lose, opponent gets the ten
+    score+=pIWin*6;          // bonus if I'm likely to win with it
+    score-=(1-pIWin)*14;     // heavy penalty if I'm likely to lose it
+  }
+
+  // F. Suit exhaustion — leading a suit where I have many cards
+  // exhausts opponents, may create voids for partner ruffing
+  const suitLen=G.hands[p].filter(c=>c.s===card.s).length;
+  if(suitLen===1&&!isTrump){
+    score+=1.2; // becoming void = future ruffing ability
+  }
+
+  // G. Don't lead into opponent's controlled suit
+  const oppControl=estimateSuitControlByOpps(card.s,wm,dist);
+  score-=oppControl*2.5*(isTrump?0.3:1.0);
+
+  return score;
+}
+
+/* ──────────────────────────────────────────────────────
+   FOLLOW SCORING
+   Someone else led. What do I throw/play?
+────────────────────────────────────────────────────── */
+function scoreFollow(p,idx,card,wm,dist,heapVal,tensAtStake){
+  const {partner,myTeam,oppTeam,
+         iWonPrev,partnerWonPrev,oppWonPrev,
+         heapIsEmpty,heapTrickCount,heapCollectionEnabled,
+         isGuaranteed} = wm;
+
+  const h=G.hands[p];
+  const lead=G.trick[0].card.s;
+  const isLast=G.trick.length===3;
+  let score=0;
+
+  // Current trick state
+  const curBest=G.trick.reduce((a,b)=>beats(b.card,a.card,lead,G.trump)?b:a);
+  const teamWinning=TEAM[curBest.p]===myTeam;
+  const partnerWinning=curBest.p===partner;
+  const myBeats=beats(card,curBest.card,lead,G.trump);
+
+  // Who wins after I play?
+  const winnerAfterMe=myBeats?p:curBest.p;
+  const winCardAfterMe=myBeats?card:curBest.card;
+  const teamWinsAfterMe=TEAM[winnerAfterMe]===myTeam;
+
+  // Heap context
+  const heapTens=G.heapBuf.filter(c=>c.r==='10'&&!G.wonIds.has(c.id)).length;
+  const trickTens=G.trick.filter(t=>t.card.r==='10').length+(card.r==='10'?1:0);
+  const totalTensAtStake=heapTens+trickTens;
+  const heapTricks=heapTrickCount;
+
+  // ── P(team wins trick after all play) ──
+  const played=new Set([...G.trick.map(t=>t.p),p]);
+  let pTeamWins;
+
+  if(isLast){
+    pTeamWins=teamWinsAfterMe?1.0:0.0;
+  } else if(teamWinsAfterMe){
+    // We're winning after my play — P(opponents don't beat us)
+    pTeamWins=pHoldsThroughRest(winnerAfterMe,winCardAfterMe,lead,played,myTeam,dist);
+  } else {
+    // Opponent winning after my play — P(a team member yet to play beats them)
+    let pSomeoneBeats=0;
+    for(let x=0;x<4;x++){
+      if(played.has(x)||TEAM[x]!==myTeam) continue;
+      pSomeoneBeats=Math.max(pSomeoneBeats,pXBeats(x,winCardAfterMe,lead,dist));
+    }
+    pTeamWins=pSomeoneBeats;
+  }
+  const pOppWins=1-pTeamWins;
+
+  // ── Heap collection probabilities ──
+  let pTeamCollects=0, pOppCollects=0;
+
+  if(heapCollectionEnabled){
+    // I win this trick:
+    if(myBeats||(!myBeats&&teamWinsAfterMe)){
+      if(iWonPrev) pTeamCollects=pTeamWins*0.91; // I already won prev → collecting now
+      else if(partnerWonPrev) pTeamCollects=pTeamWins*0.35; // partner won prev, I win now → I become prevW, need one more
+      else if(heapIsEmpty) pTeamCollects=pTeamWins*0.32;
+      else if(oppWonPrev) pTeamCollects=pTeamWins*0.30;
+      else pTeamCollects=pTeamWins*0.30;
+    }
+    // Partner wins this trick (team wins but not me):
+    if(partnerWinning&&!myBeats){
+      if(partnerWonPrev) pTeamCollects=pTeamWins*0.90; // partner about to collect!
+    }
+
+    if(oppWonPrev) pOppCollects=pOppWins*0.87;
+    else pOppCollects=pOppWins*0.28;
+  }
+
+  // A. Expected ten gain/loss
+  score+=(pTeamCollects-pOppCollects)*heapTens*10;
+
+  // B. Trick-level ten: if I throw a ten, where does it go?
+  if(card.r==='10'){
+    if(teamWinning){
+      // Current winner is team — P(team still wins after remaining players)
+      const playedSoFar=new Set(G.trick.map(t=>t.p));
+      const pCurHolds=pHoldsThroughRest(curBest.p,curBest.card,lead,playedSoFar,myTeam,dist);
+      score+=pCurHolds*9;    // ten goes to team — great
+      score-=(1-pCurHolds)*16; // ten goes to opponent — terrible
+      // Extra: if partner is current winner AND already won prev trick (about to collect)
+      if(partnerWinning&&partnerWonPrev) score+=5;
+    } else {
+      // Opponent winning right now — don't throw ten
+      // But maybe I can beat them first?
+      if(myBeats){
+        // I'm beating the opponent WITH my ten — risky but might work
+        score+=pTeamWins*6-(1-pTeamWins)*15;
+      } else {
+        score-=22; // throwing ten to opponent = very bad
+      }
+    }
+  }
+
+  // C. Card efficiency — don't spend high cards on low-value tricks
+  const cardRV=RV[card.r]||0;
+  const isHighCard=cardRV>=RV['K'];
+  const isTrump=G.trump&&card.s===G.trump;
+  const totalVal=totalTensAtStake*10+heapTricks*0.8;
+
+  if(myBeats&&(isHighCard||isTrump)){
+    // I'm trying to win — is the heap worth the card cost?
+    const cardCost=(cardRV-RV['9'])*1.5;
+    // Justify: if heap has value and I'm likely to hold, it's worth it
+    const benefit=pTeamWins*totalVal;
+    if(benefit<cardCost*0.5){
+      score-=cardCost*(1-pTeamWins)*1.0; // penalty for likely-futile high card spend
+    }
+    // Extra penalty: spending guaranteed winner (A/K) on empty no-ten heap
+    if(isGuaranteed(card)&&totalTensAtStake===0&&heapTricks<=1){
+      score-=cardCost*1.2; // this is a waste — save guaranteed winner for a better heap
+    }
+  }
+
+  // D. When NOT to win: if team is already winning safely, don't over-win
+  // (BUGFIX: this used to be written as `!card.r==='10'`, which — due to
+  // operator precedence — evaluates as `(!card.r)==='10'`, i.e. always
+  // false, so this whole rule never fired. That's why the bot would
+  // needlessly play its Ace to "beat" a card its own partner already had
+  // winning, instead of playing a low card and saving the Ace.)
+  if(teamWinning&&myBeats&&card.r!=='10'){
+    // Team already winning — do I need to spend this card?
+    const curTeamHolds=pHoldsThroughRest(curBest.p,curBest.card,lead,
+      new Set(G.trick.map(t=>t.p)),myTeam,dist);
+    if(isLast&&partnerWinning){
+      // I'm the last to act and my partner already has the trick won —
+      // overtaking them accomplishes nothing but burning a good card.
+      score-=(cardRV-RV['9'])*1.5;
+    } else if(curTeamHolds>0.65){
+      // Team very likely to win anyway — penalize spending a high card
+      score-=(cardRV-RV['9'])*curTeamHolds*1.1;
+    }
+  }
+
+  // E. Safe discard preference — when can't/shouldn't win
+  if(!myBeats||(!teamWinsAfterMe&&!myBeats)){
+    // I'm discarding. Prefer low, non-ten, non-trump.
+    score+=(1.0/(cardRV+1))*2.5;     // prefer low ranks
+    // Only penalize trump as a *discretionary* waste (chopping a non-trump
+    // trick). If the lead suit itself is trump, I'm forced to follow suit —
+    // ducking low here is the correct, safe play and must not be penalized,
+    // or a needless high-card overtake (see trick-5 case: partner already
+    // winning with Q, only A can beat it either way, so burning the K gains
+    // nothing) ends up scoring higher than the safe duck by comparison.
+    if(isTrump&&!myBeats&&lead!==G.trump) score-=3;
+  }
+
+  // F. Bonus: partner about to collect, I can safely dump a ten to them
+  if(partnerWinning&&partnerWonPrev&&heapCollectionEnabled){
+    const pHolds=pHoldsThroughRest(partner,curBest.card,lead,
+      new Set(G.trick.map(t=>t.p)),myTeam,dist);
+    if(card.r==='10'&&pHolds>0.65){
+      score+=pHolds*12; // dump ten to partner who is about to collect = excellent
+    }
+  }
+
+  return score;
+}
+
+/* ──────────────────────────────────────────────────────
+   HELPER: P(player x controls suit s — has highest remaining)
+   Used to assess whether leading into a suit is dangerous.
+────────────────────────────────────────────────────── */
+function estimateSuitControl(x,suit,wm,dist){
+  const rem=wm.remaining[suit];
+  if(!rem.length) return 0;
+  const topCard=rem.reduce((a,b)=>RV[a.r]>RV[b.r]?a:b);
+  const cid=topCard.id;
+  if(x===wm.p) return G.hands[x].some(c=>c.id===cid)?1:0;
+  return dist[cid]?dist[cid][x]:0;
+}
+
+function estimateSuitControlByOpps(suit,wm,dist){
+  const {opps}=wm;
+  const rem=wm.remaining[suit];
+  if(!rem.length) return 0;
+  const topCard=rem.reduce((a,b)=>RV[a.r]>RV[b.r]?a:b);
+  const cid=topCard.id;
+  let pOppHas=0;
+  for(const x of opps) pOppHas+=(dist[cid]?dist[cid][x]:0);
+  return Math.min(1,pOppHas);
+}
+
+/* ──────────────────────────────────────────────────────
+   TRUMP OPEN CARD CHOICE
+   I'm void in lead suit — must reveal trump.
+   Pick a suit where I have cheap card + high card backup.
+   Goal: spend cheap, keep high card to win after reveal.
+────────────────────────────────────────────────────── */
+function chooseTrumpOpenCard(p,leadSuit){
+  const h=G.hands[p];
+  const cands=SUITS.filter(s=>s!==leadSuit&&h.some(c=>c.s===s));
+  if(!cands.length) return null;
+
+  function suitScore(s){
+    const cards=h.filter(c=>c.s===s);
+    const ranks=cards.map(c=>RV[c.r]);
+    const maxR=Math.max(...ranks);
+    const minR=Math.min(...ranks);
+    let sc=0;
+    sc+=cards.length*10;
+    if(maxR===RV['A']) sc+=25;
+    if(maxR>=RV['K']&&cards.length>=2) sc+=15;
+    if(maxR-minR>=4) sc+=8;
+    if(cards.length===1) sc-=40;
+    if(cards.length===1&&maxR>=RV['K']) sc-=20;
+    if(cards.some(c=>c.r==='10')&&maxR>=RV['K']) sc+=5;
+    return sc;
+  }
+
+  const bestSuit=cands.reduce((b,s)=>suitScore(s)>suitScore(b)?s:b,cands[0]);
+  const suitCards=h.map((c,i)=>({c,i})).filter(({c})=>c.s===bestSuit);
+  return suitCards.reduce((a,b)=>RV[a.c.r]<RV[b.c.r]?a:b).i;
+}
+
+
+
+/* ══════════════════════════════════════
+   RENDER
+══════════════════════════════════════ */
+function render(){
+  if(NET.mode==='host'&&typeof applyPNAMEHost==='function')applyPNAMEHost();
+  renderScores();renderNames();renderOpponents();renderArc();renderPhase();
+  if(G){updateTrumpUI();renderHeapsFull();updateHeapArrow();renderTrickSlots();}
+  if(NET.mode==='host')broadcastState();
+}
+function renderTrickSlots(){
+  const present={};
+  G.trick.forEach(t=>{present[t.p]=t.card;});
+  for(let p=0;p<4;p++){
+    const sb=document.getElementById(SB_ID[p]);
+    if(!sb)continue;
+    if(present[p]){
+      if(!sb.querySelector('.card')){
+        sb.innerHTML='';sb.classList.add('hascard');
+        sb.appendChild(mkCard(present[p],'played cin'));
+      }
+    } else if(sb.classList.contains('hascard')||sb.querySelector('.card')){
+      sb.innerHTML='';sb.classList.remove('hascard');
+    }
+  }
+}
+function renderHeapsFull(){
+  [0,1].forEach(team=>{
+    const cnt=document.getElementById(team===0?'huscnt':'htmcnt');
+    if(!cnt)return;
+    cnt.textContent=(G.hCounts[team]||0)+' tricks';
+  });
+  updateHeapTens();
+}
+const PIP_SUITS=['♠','♥','♦','♣']; // must match id order: pu0/pt0=♠, pu1/pt1=♥, pu2/pt2=♦, pu3/pt3=♣
+function renderScores(){
+  for(let i=0;i<4;i++){
+    const suit=PIP_SUITS[i];
+    document.getElementById('pu'+i).classList.toggle('won',G.tTenCards[0].includes(suit));
+    document.getElementById('pt'+i).classList.toggle('won',G.tTenCards[1].includes(suit));
+  }
+  document.getElementById('tku').textContent=G.tTricks[0]+' tricks';
+  document.getElementById('tkt').textContent=G.tTricks[1]+' tricks';
+  updateHeapTens();
+}
+function renderNames(){
+  for(let p=0;p<4;p++){
+    const el=document.getElementById(NM_ID[p]);if(!el)continue;
+    const tel=document.getElementById('tcd'+p);
+    let cls='pname';
+    if(p===0)cls+=' you';else if(p===2)cls+=' partner';else cls+=' opponent';
+    const isCur=!!(G&&G.cur===p);
+    let urgent=false;
+    if(TURNCD&&TURNCD.seat===p){
+      const rem=Math.max(0,Math.ceil((TURNCD.endsAt-Date.now())/1000));
+      urgent=rem<=20;
+      if(tel){
+        tel.textContent=rem;
+        tel.className='tcd active'+(urgent?' urgent':'');
+      }
+    } else if(tel){
+      tel.textContent='';
+      tel.className='tcd';
+    }
+    if(isCur)cls+=' on';
+    if(urgent)cls+=' urgent';
+    let txt=PNAME[p];
+    if(G&&G.trumpBy===p)txt+=' \uD83C\uDFBA';
+    if(isAISeat(p))txt+=' \uD83E\uDD16';
+    if(isCur)txt+=' \u25CF';
+    el.className=cls;
+    el.textContent=txt;
+    el.title=txt;
+    const tw=document.getElementById('tw'+p);
+    if(tw) tw.classList.toggle('show',!!(G&&G.lastTrickW===p));
+  }
+  // item 9: the plus-cross slot labels show the actual player's name,
+  // not a fixed "Top/Left/Right" position label.
+  const SL_ID={2:'sl-top',1:'sl-left',0:'sl-btm',3:'sl-right'};
+  for(const p in SL_ID){
+    const el=document.getElementById(SL_ID[p]);
+    if(el) el.textContent=(Number(p)===0)?'You':PNAME[p];
+  }
+  updateTeamLabels();
+}
+/* Short display name for compact team labels — strips bot/trophy/etc
+   decorations and truncates long names so "X & Y" fits in tight spots. */
+function shortName(p){
+  let n=(PNAME[p]||'').replace(/\s*\(Bot\)$/,'').trim();
+  if(n.length>9) n=n.slice(0,8)+'…';
+  return n;
+}
+function updateTeamLabels(){
+  const us=document.getElementById('teamlbl-us');
+  const them=document.getElementById('teamlbl-them');
+  if(us) us.textContent='Team A';
+  if(them) them.textContent='Team B';
+  const hlUs=document.getElementById('hl-us'), hlTm=document.getElementById('hl-tm');
+  if(hlUs) hlUs.textContent='Team A ('+shortName(0)+' & '+shortName(2)+')';
+  if(hlTm) hlTm.textContent='Team B ('+shortName(1)+' & '+shortName(3)+')';
+}
+function renderOppPile(elId,count,kind){
+  const el=document.getElementById(elId);
+  el.innerHTML='';
+  // Fan a capped number of card-backs out in a gentle half-circle
+  // (like a hand of cards held face-down) instead of a flat stack —
+  // reads much better next to the vertical nameplate.
+  const shown=Math.min(count,5);
+  const cw=el.clientWidth||(kind==='top'?110:44);
+  const ch=el.clientHeight||(kind==='top'?48:70);
+  for(let i=0;i<shown;i++){
+    const frac=shown===1?0.5:i/(shown-1);
+    const b=document.createElement('div');
+    b.className='cb pile '+kind;
+    if(kind==='top'){
+      // fan left-to-right, arcing slightly upward at the edges
+      const spread=Math.min(26,(cw-30)/Math.max(shown-1,1));
+      const totalW=(shown-1)*spread+30;
+      const startX=(cw-totalW)/2;
+      const ang=(frac-.5)*36;
+      const rise=6*(4*Math.pow(frac-.5,2));
+      b.style.left=(startX+i*spread)+'px';
+      b.style.top=(rise)+'px';
+      b.style.transform='rotate('+ang+'deg)';
+    } else {
+      // fan top-to-bottom for the side players, curving toward center —
+      // a proper half-circle that closes back in at the top and bottom
+      // edges rather than a flat vertical stack.
+      const spread=Math.min(20,(ch-43)/Math.max(shown-1,1));
+      const totalH=(shown-1)*spread+43;
+      const startY=(ch-totalH)/2;
+      const ang=(frac-.5)*70;
+      const push=10*(4*Math.pow(frac-.5,2));
+      b.style.top=(startY+i*spread)+'px';
+      b.style.left=push+'px';
+      b.style.transform='rotate('+ang+'deg)';
+    }
+    b.style.zIndex=i;
+    el.appendChild(b);
+  }
+  if(count>0){
+    const cnt=document.createElement('div');
+    cnt.className='pilecnt';cnt.textContent=count;
+    el.appendChild(cnt);
+  }
+}
+function renderOpponents(){
+  renderOppPile('top-cards',G.hands[2].length,'top');
+  renderOppPile('left-cards',G.hands[1].length,'side');
+  renderOppPile('right-cards',G.hands[3].length,'side');
+}
+function renderArc(){
+  const arc=document.getElementById('arc');arc.innerHTML='';
+  const hand=G.hands[0];const n=hand.length;
+  if(!n)return;
+  const ok=(G.cur===0&&!G.gameOver)?getOk(0):new Set();
+  // #arc lives inside the fixed-size #stage (400px design width) which is
+  // then CSS-scaled to fit the real device — window.innerWidth is REAL
+  // device pixels, not #stage's local coordinate space, so using it here
+  // made the arc wider than its container on most phones and pushed the
+  // last few cards off-screen. Measure the actual local container instead.
+  const W=(document.getElementById('yourzone')||arc).clientWidth||392;
+  const CW=43; // card width (matches .card.hand)
+  arc.style.width=W+'px';
+
+  // Fan spread: ensure all cards fit, max overlap friendly
+  const maxSpread=Math.floor((W-CW)/Math.max(n-1,1));
+  const spread=Math.min(26,maxSpread);
+  const totalW=(n-1)*spread+CW;
+  const startX=(W-totalW)/2;
+
+  // Arc angle: more pronounced for more cards
+  const maxDeg=Math.min(32,n*2.8);
+
+  // Arc vertical offset: cards curve upward at edges (true half-circle feel)
+  // Use a quadratic: center cards are at bottom, edge cards rise slightly
+  const arcRise=Math.min(18,n*1.2); // max px rise at edges
+
+  hand.forEach((card,i)=>{
+    const frac=n===1?0.5:i/(n-1);
+    const ang=(frac-.5)*maxDeg*2;
+    // Parabolic rise: edges rise, center is lowest
+    const paraRise=arcRise*(4*Math.pow(frac-.5,2));
+    const xOff=startX+i*spread;
+    const el=mkCard(card,'hand');
+    el.style.left=xOff+'px';
+    el.style.bottom=(4+paraRise)+'px';
+    el.style.transformOrigin='50% 200%';  // longer radius = better arc feel
+    el.style.transform='rotate('+ang+'deg)';
+    el.style.zIndex=i+1;
+    if(DEALT_ANIM_PENDING){ el.classList.add('dealt'); el.style.animationDelay=(i*40)+'ms'; }
+    if(G.sel===i)el.classList.add('sel');
+    if(G.cur===0&&!ok.has(i))el.classList.add('dim');
+    else if(G.cur===0&&ok.has(i))el.classList.add('playable');
+    if(G.cur===0&&!G.gameOver&&ok.has(i)){
+      el.addEventListener('click',()=>tapCard(i));
+      el.addEventListener('touchend',e=>{e.preventDefault();tapCard(i);},{passive:false});
+    }
+    arc.appendChild(el);
+  });
+  DEALT_ANIM_PENDING=false;
+}
+function renderPhase(){
+  const ph={deal5:'5-Card Phase',main:'Main Phase',over:'Hand Over'};
+  document.getElementById('phasebadge').textContent=ph[G.phase]||'';
+  if(!G.gameOver){
+    if(G.cur===0)info(G.sel>=0?'Tap again to play  \u2022  tap another to switch':'Your turn \u2014 tap to select, tap again to play');
+    else info(PNAME[G.cur]+' is thinking...');
+  }
+}
+
+/* ══════════════════════════════════════
+   HELPERS
+══════════════════════════════════════ */
+function clearSlots(){
+  for(let p=0;p<4;p++){const sb=document.getElementById(SB_ID[p]);sb.innerHTML='';sb.classList.remove('hascard');}
+}
+function setDiff(d){
+  DIFFICULTY=d;
+  const b=document.getElementById('diffbadge');
+  if(b){b.textContent=DIFFICONS[DIFFICULTY]+' '+DIFFNAMES[DIFFICULTY];b.className='';if(d===1)b.classList.add('easy');else if(d===3)b.classList.add('hard');}
+  // Keep the difficulty-picker modal's highlight in sync if it's open —
+  // setDiff doesn't close the modal, so the player can see which mode
+  // is actually selected before hitting "Deal Cards".
+  [1,2,3].forEach(n=>{
+    const el=document.getElementById('diffbtn'+n);
+    if(el) el.classList.toggle('sel',n===d);
+  });
+}
+function cycleDiff(){
+  DIFFICULTY=DIFFICULTY%3+1;
+  const b=document.getElementById('diffbadge');
+  b.textContent=DIFFICONS[DIFFICULTY]+' '+DIFFNAMES[DIFFICULTY];
+  b.className='';
+  if(DIFFICULTY===1)b.classList.add('easy');
+  else if(DIFFICULTY===3)b.classList.add('hard');
+}
+function info(t){document.getElementById('infomsg').textContent=t;}
+/* ── Fullscreen (app-like immersive mode) ──
+   Uses the standard Fullscreen API with vendor-prefixed fallbacks for
+   older mobile browsers. Requires a user gesture to enter (browser
+   security rule) so it's wired to a button tap, never auto-triggered. */
+function isFullscreen(){
+  return !!(document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement);
+}
+function toggleFullscreen(){
+  const el=document.documentElement;
+  if(!isFullscreen()){
+    const req=el.requestFullscreen||el.webkitRequestFullscreen||el.msRequestFullscreen;
+    if(req) req.call(el).catch(()=>fmsg('Fullscreen not available on this browser'));
+    else fmsg('Fullscreen not available on this browser');
+  } else {
+    const exit=document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen;
+    if(exit) exit.call(document);
+  }
+}
+function updateFsBtn(){
+  const b=document.getElementById('fsbtn');
+  if(b) b.textContent=isFullscreen()?'⛶ Exit':'⛶';
+}
+['fullscreenchange','webkitfullscreenchange','MSFullscreenChange'].forEach(ev=>
+  document.addEventListener(ev,updateFsBtn));
+function fmsg(txt,top=35,_fromNet){
+  const el=document.createElement('div');el.className='fmsg';el.textContent=txt;
+  el.style.top=(top+18*(Math.random()-.5))+'%';
+  document.getElementById('wrap').appendChild(el);
+  setTimeout(()=>el.remove(),2200);
+  // These transient toasts ("X wins this trick", "X opens trump", etc)
+  // are triggered by game logic that only ever runs on the host device —
+  // without this, only the host ever saw them (item 11). Rebroadcast so
+  // every connected player gets the same toast in real time.
+  if(!_fromNet&&typeof NET!=='undefined'&&NET.mode==='host') NET.broadcast({type:'fmsg',txt,top});
+}
+function showModal(title,body,btns,big){
+  document.getElementById('mtitle').innerHTML=title;
+  document.getElementById('mbody').innerHTML=body;
+  const bb=document.getElementById('mbtns');bb.innerHTML='';
+  for(const b of btns){const btn=document.createElement('button');btn.className='btn';btn.textContent=b.lbl;btn.onclick=b.fn;bb.appendChild(btn);}
+  document.getElementById('mbox').classList.toggle('mbox-lg',!!big);
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+/* ══════════════════════════════════════
+   MULTIPLAYER (peer-to-peer rooms, PeerJS)
+   Host device runs the real game (unchanged rules/logic).
+   Joined players are mirrored a rotated copy of the state
+   so each of them sees their own hand at the bottom, and
+   forward their taps to the host to actually play them.
+══════════════════════════════════════ */
+/* WebRTC needs a TURN relay (not just STUN) for players to connect
+   across different networks — without one, direct peer-to-peer only
+   succeeds when both sides are on friendly NATs (often only true on
+   the same home/office network). We fetch short-lived TURN credentials
+   from the project's own metered.ca account (works for players on ANY
+   network, anywhere), and fall back to a public relay if that fetch
+   ever fails (offline dev preview, metered outage, etc). */
+const METERED_DOMAIN='dehlapakad.metered.live';
+const METERED_API_KEY='Bdn1tpLIFxQg34jGchy3YOV6arysdYWkEA5c8Hc7-Lu69x3R';
+const FALLBACK_ICE_SERVERS=[
+  {urls:'stun:stun.l.google.com:19302'},
+  {urls:'stun:stun1.l.google.com:19302'},
+  {urls:'turn:openrelay.metered.ca:80',username:'openrelayproject',credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443',username:'openrelayproject',credential:'openrelayproject'},
+  {urls:'turn:openrelay.metered.ca:443?transport=tcp',username:'openrelayproject',credential:'openrelayproject'}
+];
+let _iceServersCache=null,_iceServersPromise=null;
+function fetchIceServers(){
+  if(_iceServersPromise) return _iceServersPromise;
+  _iceServersPromise=(async()=>{
+    try{
+      const ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+      const t=ctrl?setTimeout(()=>ctrl.abort(),4000):null;
+      const res=await fetch('https://'+METERED_DOMAIN+'/api/v1/turn/credentials?apiKey='+METERED_API_KEY,ctrl?{signal:ctrl.signal}:{});
+      if(t)clearTimeout(t);
+      if(!res.ok) throw new Error('turn creds http '+res.status);
+      const servers=await res.json();
+      if(!Array.isArray(servers)||!servers.length) throw new Error('empty turn creds');
+      _iceServersCache=[{urls:'stun:stun.l.google.com:19302'},...servers];
+    }catch(e){
+      console.warn('Metered TURN fetch failed, falling back to public relay:',e);
+      _iceServersCache=FALLBACK_ICE_SERVERS;
+    }
+    return _iceServersCache;
+  })();
+  return _iceServersPromise;
+}
+async function getIceConfig(){
+  const servers=_iceServersCache||await fetchIceServers();
+  return {iceServers:servers};
+}
+fetchIceServers(); // kick off immediately so it's cached before Create/Join is tapped
+const SEATLBL=['Player A1 (Host)','Player B1','Player A2','Player B2'];
+const NET={
+  mode:'offline',        // 'offline' | 'host' | 'client'
+  peer:null,
+  mySeat:0,               // canonical seat assigned to THIS device (host is always 0)
+  conns:{},               // host only: seat -> DataConnection
+  hostConn:null,          // client only: connection to the host
+  names:['','','',''],    // host only: canonical seat -> display name
+  myName:'',              // client only: my own chosen name
+  humanSeats:new Set(),   // host only: seats currently controlled by a connected human
+  roomCode:null,
+  inLobby:false,
+  reconnecting:false,     // true while we're trying to recover a dropped connection
+  reconnTries:0,
+  reconnTimer:null,
+  turnTimer:null,         // host only: 120s per-turn timeout for the current human seat
+  turnTimerSeat:null,
+  hbTimer:null,           // host only: heartbeat interval that pings every connected seat
+  aiControlled:new Set(), // host only: seats (local numbering) currently played by AI on a human's behalf
+  migrationOffset:0,      // host only: set after a host-migration takeover — see attemptHostTakeover()
+  rejoining:false,        // client only: true while replaying a saved session's seat claim
+  send(msg){ if(this.hostConn&&this.hostConn.open){ try{this.hostConn.send(msg);}catch(e){} } },
+  broadcast(msg){ for(const s in this.conns){ const c=this.conns[s]; if(c&&c.open){ try{c.send(msg);}catch(e){} } } }
+};
+let AICTRL=new Set(); // client only: this device's local-numbered view of which seats are AI-controlled
+function isAISeat(p){
+  if(NET.mode==='host') return NET.aiControlled.has(p);
+  if(NET.mode==='client') return AICTRL.has(p);
+  return false;
+}
+
+/* ── visible 120s countdown (shown on the active player's nameplate) ──
+   TURNCD holds {seat, endsAt} in THIS device's own (rotated) seat
+   numbering. The host derives it locally when it starts the grace
+   timer; clients receive it via a 'turnTimer' broadcast so everyone
+   sees the same countdown, not just the host. */
+let TURNCD=null;
+let turnCDInterval=null;
+function startTurnCDTicker(){
+  if(turnCDInterval)return;
+  turnCDInterval=setInterval(()=>{
+    if(!TURNCD){stopTurnCDTicker();return;}
+    if(Date.now()>=TURNCD.endsAt){TURNCD=null;stopTurnCDTicker();}
+    renderNames();
+  },1000);
+  renderNames();
+}
+function stopTurnCDTicker(){
+  if(turnCDInterval){clearInterval(turnCDInterval);turnCDInterval=null;}
+}
+
+function maybeAI(delay){
+  if(!G||NET.mode==='client') return; // clients never run the engine locally
+  if(NET.mode==='offline'){
+    if(G.cur===0) return;             // solo vs AI — this device's own seat, wait for a tap
+    clearTurnTimer();
+    setTimeout(aiGo,delay);
+    return;
+  }
+  // multiplayer host: every seat (including the host's own, seat 0) is a
+  // real player and gets the same treatment.
+  const seat=G.cur;
+  if(NET.aiControlled.has(seat)){
+    // Already handed to AI (by timeout or explicit handover) — no more
+    // waiting, it plays immediately every turn until reclaimed.
+    clearTurnTimer();
+    setTimeout(aiGo,delay);
+    return;
+  }
+  const isHuman=(seat===0)||NET.humanSeats.has(seat);
+  if(isHuman){
+    // A seat belonging to a human (connected or mid-reconnect) — give them
+    // up to 120s to act before an AI steps in for that turn.
+    scheduleTurnTimeout();
+    return;
+  }
+  clearTurnTimer();
+  setTimeout(aiGo,delay);
+}
+/* ── 120s per-turn grace for human seats (host only) ──
+   Covers both a genuinely idle/away player AND someone whose connection
+   just dropped (see onSeatDisconnect) — either way, if they haven't acted
+   within the window, an AI plays this one turn for them so the game keeps
+   moving. After that first timeout, the seat is marked aiControlled so
+   every subsequent turn plays instantly instead of waiting out another
+   120s — until the player (or the host, for a client seat) reclaims it. */
+const TURN_TIMEOUT_MS=60000;
+function clearTurnTimer(){
+  const hadTimer=!!NET.turnTimer;
+  if(NET.turnTimer){clearTimeout(NET.turnTimer);NET.turnTimer=null;}
+  NET.turnTimerSeat=null;
+  if(hadTimer){
+    TURNCD=null;stopTurnCDTicker();renderNames();
+    NET.broadcast({type:'turnTimerClear'});
+  }
+}
+function scheduleTurnTimeout(){
+  if(NET.mode!=='host'||!G||G.gameOver) return;
+  const seat=G.cur;
+  if(NET.aiControlled.has(seat)) return; // already handed to AI — no grace period needed
+  if(seat!==0&&!NET.humanSeats.has(seat)) return;
+  if(NET.turnTimer&&NET.turnTimerSeat===seat) return; // already counting down for this turn
+  clearTurnTimer();
+  NET.turnTimerSeat=seat;
+  const endsAt=Date.now()+TURN_TIMEOUT_MS;
+  NET.turnTimer=setTimeout(()=>{
+    NET.turnTimer=null;
+    TURNCD=null;stopTurnCDTicker();
+    NET.broadcast({type:'turnTimerClear'});
+    if(!G||G.gameOver||G.cur!==seat) return;
+    if(seat!==0&&!NET.humanSeats.has(seat)) return;
+    fmsg(PNAME[seat]+' took too long — AI plays for them this turn');
+    NET.aiControlled.add(seat);
+    renderNames();
+    forceAIPlay(seat);
+  },TURN_TIMEOUT_MS);
+  TURNCD={seat,endsAt}; // host's own seat numbering === canonical (host is always seat 0)
+  startTurnCDTicker();
+  NET.broadcast({type:'turnTimer',seat,endsAt});
+}
+/* Toggle AI control of a seat on/off (explicit handover / reclaim), for
+   either a connected client's seat or the host's own seat 0. */
+function hostSetAIControl(seat,on){
+  if(on) NET.aiControlled.add(seat); else NET.aiControlled.delete(seat);
+  renderNames();
+  if(G) broadcastState();
+  if(G&&!G.gameOver&&G.cur===seat){ clearTurnTimer(); maybeAI(on?400:0); }
+}
+function forceAIPlay(seat){
+  if(!G||G.gameOver) return;
+  const ok=[...getOk(seat)];
+  if(!ok.length) return;
+  let idx;
+  try{ idx=aiPick(seat,ok); }catch(e){ idx=ok[0]; }
+  if(idx==null||idx<0||idx>=G.hands[seat].length) idx=ok[0];
+  doPlay(seat,idx);
+}
+
+function genCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='';for(let i=0;i<5;i++)s+=chars[Math.floor(Math.random()*chars.length)];
+  return s;
+}
+function roomCodeFromInput(v){return (v||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');}
+async function copyTextToClipboard(text){
+  // navigator.clipboard requires a secure context (https) and can be
+  // blocked by permissions/embedding — always have a working fallback.
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    try{ await navigator.clipboard.writeText(text); return true; }catch(e){/* fall through */}
+  }
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text;
+    ta.style.cssText='position:fixed;top:-1000px;left:-1000px;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();ta.select();ta.setSelectionRange(0,text.length);
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(ok) return true;
+  }catch(e){/* fall through */}
+  return false;
+}
+function copyRoomCode(){
+  const code=NET.roomCode||'';
+  const btn=document.querySelector('.mp-copybtn');
+  copyTextToClipboard(code).then(ok=>{
+    if(ok){
+      fmsg('Code copied!');
+      if(btn){const orig=btn.textContent;btn.textContent='Copied!';setTimeout(()=>{btn.textContent=orig;},1500);}
+    } else {
+      // Last resort: select the code text on screen so the user can copy manually.
+      const codeEl=document.querySelector('.mp-share code');
+      if(codeEl&&window.getSelection){
+        const range=document.createRange();range.selectNodeContents(codeEl);
+        const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+      }
+      fmsg('Copy failed — code selected, copy manually: '+code);
+    }
+  });
+}
+function roomJoinLink(code){
+  return location.origin+location.pathname+'?room='+code;
+}
+function shareRoomCode(){
+  const code=NET.roomCode||'';
+  const link=roomJoinLink(code);
+  const text='Join my Dehla Pakad game! Room code: '+code+'\n'+link;
+  if(navigator.share){
+    // Native share sheet — user picks WhatsApp (or any app) themselves.
+    navigator.share({title:'Dehla Pakad — Room '+code,text,url:link}).catch(()=>{/* user cancelled — no-op */});
+    return;
+  }
+  // No native share sheet (mainly desktop browsers) — open WhatsApp
+  // directly with the message prefilled; the user just hits send.
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+function leaveRoom(){
+  NET.reconnecting=false;NET.rejoining=false;
+  if(NET.reconnTimer){clearTimeout(NET.reconnTimer);NET.reconnTimer=null;}
+  // Tell the host this is a deliberate exit (not a dropped connection) so
+  // it hands the seat to AI right away instead of waiting out the grace period.
+  try{if(NET.mode==='client'&&NET.hostConn&&NET.hostConn.open)NET.hostConn.send({type:'leaving'});}catch(e){}
+  // If the host itself is leaving, tell everyone right away instead of
+  // making them wait out the normal reconnect grace period to find out.
+  try{if(NET.mode==='host')NET.broadcast({type:'hostLeaving'});}catch(e){}
+  clearSavedSession();
+  try{if(NET.peer)NET.peer.destroy();}catch(e){}
+  if(NET.hbTimer){clearInterval(NET.hbTimer);NET.hbTimer=null;}
+  location.href=location.pathname;
+}
+function confirmLeave(){
+  showModal('Leave Game?','<div style="font-size:12px;color:rgba(255,255,255,.6)">Your seat will be handed to AI so the game can continue without you.</div>',[{lbl:'Leave',fn:leaveRoom},{lbl:'Cancel',fn:closeModal}]);
+}
+/* ── options menu (\u22EE, top-right of the room bar) ──
+   Lets any player hand their own seat's turns over to AI temporarily,
+   or take control back, without leaving the room. */
+function showOptionsMenu(){
+  const underAI=isAISeat(0);
+  const body=underAI
+    ?'<div style="font-size:12px;color:rgba(255,255,255,.6)">AI is currently playing your turns for you.</div>'
+    :'<div style="font-size:12px;color:rgba(255,255,255,.6)">Let AI play your turns for you — come back anytime and take control back.</div>';
+  showModal('\u22EE Options',body,underAI
+    ?[{lbl:'Take Back Control',fn:requestAIReclaim},{lbl:'Close',fn:closeModal}]
+    :[{lbl:'Hand Over to AI',fn:requestAIHandover},{lbl:'Close',fn:closeModal}]);
+}
+function requestAIHandover(){
+  closeModal();
+  if(NET.mode==='client') NET.send({type:'handover'});
+  else if(NET.mode==='host') hostSetAIControl(0,true);
+  fmsg('AI will play your turns until you take back control');
+}
+function requestAIReclaim(){
+  closeModal();
+  if(NET.mode==='client') NET.send({type:'reclaim'});
+  else if(NET.mode==='host') hostSetAIControl(0,false);
+  fmsg('You\u2019re back in control');
+}
+function updateBotbarVisibility(){
+  const mp=NET.mode==='host'||NET.mode==='client';
+  const newgameBtn=document.getElementById('newgamebtn');
+  const leaveBtn=document.getElementById('leavebtn');
+  const optBtn=document.getElementById('optionsbtn');
+  if(newgameBtn) newgameBtn.style.display=(mp&&NET.mode!=='host')?'none':'inline-block';
+  if(leaveBtn) leaveBtn.style.display=mp?'inline-block':'none';
+  if(optBtn) optBtn.style.display=mp?'inline-flex':'none';
+}
+function setNetStatus(text,cls){
+  const el=document.getElementById('rb-status');
+  if(!el)return;
+  el.textContent=text;
+  el.className=cls||'';
+  if(cls==='connected') setTimeout(()=>{ if(el.className==='connected') el.textContent=''; },2500);
+}
+/* ── Connection resilience ──
+   Mobile browsers throttle/suspend background tabs, which drops the
+   WebRTC/PeerJS connection whenever someone switches apps (e.g. to copy
+   a room code into WhatsApp). Without this, the game is stuck showing
+   "offline" on return. This detects the drop and automatically recovers
+   it once the app is foregrounded/back online again, instead of
+   requiring the player to manually leave and rejoin. */
+function setupNetworkResilience(){
+  const tryRecover=()=>{
+    if(!NET.peer||NET.mode==='offline') return;
+    if(NET.peer.destroyed) return;
+    if(NET.peer.disconnected){ try{NET.peer.reconnect();}catch(e){} }
+    if(NET.mode==='client'&&(!NET.hostConn||!NET.hostConn.open)&&!NET.reconnecting){
+      clientReconnect();
+    }
+  };
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') tryRecover(); });
+  window.addEventListener('online',tryRecover);
+  window.addEventListener('focus',tryRecover);
+}
+function clientReconnect(){
+  if(NET.mode!=='client'||!NET.roomCode||NET.mySeat==null) return;
+  if(NET.reconnecting) return;
+  NET.reconnecting=true;NET.reconnTries=0;
+  setNetStatus('🔄 Reconnecting…','reconnecting');
+  attemptClientReconnect();
+}
+async function attemptClientReconnect(){
+  if(!NET.reconnecting) return; // gave up or already recovered
+  NET.reconnTries++;
+  try{ if(NET.peer&&!NET.peer.destroyed) NET.peer.destroy(); }catch(e){}
+  const iceConfig=await getIceConfig();
+  if(!NET.reconnecting) return; // gave up while we were awaiting ICE config
+  // Every other attempt forces TURN-relay-only — helps when a VPN or
+  // strict NAT is blocking direct/STUN candidates so those attempts
+  // would otherwise just hang instead of erroring out.
+  const forceRelay=NET.reconnTries%2===0;
+  const cfg=forceRelay?{iceServers:iceConfig.iceServers,iceTransportPolicy:'relay'}:iceConfig;
+  const peer=new Peer(cfg);
+  NET.peer=peer;
+  let settled=false;
+  const watchdog=setTimeout(()=>{ if(!settled) scheduleClientRetry(); },15000);
+  peer.on('open',()=>{
+    const conn=peer.connect('dehla-'+NET.roomCode,{reliable:true});
+    NET.hostConn=conn;
+    conn.on('open',()=>{ settled=true;clearTimeout(watchdog); conn.send({type:'claim',seat:NET.mySeat,name:NET.myName}); });
+    conn.on('data',data=>handleClientMessage(data));
+    conn.on('close',()=>{ if(!NET.reconnecting) return; scheduleClientRetry(); });
+    conn.on('error',()=>{ if(!NET.reconnecting) return; scheduleClientRetry(); });
+  });
+  peer.on('error',()=>{ if(!settled){settled=true;clearTimeout(watchdog);scheduleClientRetry();} });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
+}
+/* Generous retry budget: someone who minimizes the browser to reply on
+   WhatsApp for a minute or two should come back to a game still waiting
+   for them, not a "connection lost" screen. ~40 tries at up to 6s apart
+   gives roughly 3+ minutes of automatic reconnect attempts, which lines
+   up with the 120s per-turn grace the host gives before an AI steps in. */
+function scheduleClientRetry(){
+  if(!NET.reconnecting) return;
+  if(NET.reconnTries>=40){
+    NET.reconnecting=false;
+    setNetStatus('',null);
+    const canTakeover=!!G;
+    showModal('Connection Lost',
+      '<div style="font-size:12px;color:rgba(255,255,255,.6)">Couldn\'t reconnect to the host.'+(canTakeover?' You can try to take over as host to keep the game going, or check your connection and rejoin.':' Check your internet connection and rejoin.')+'</div>',
+      canTakeover
+        ?[{lbl:'Become Host',fn:()=>{closeModal();attemptHostTakeover();}},{lbl:'Back to Menu',fn:()=>{clearSavedSession();location.href=location.pathname;}}]
+        :[{lbl:'Back to Menu',fn:()=>{clearSavedSession();location.href=location.pathname;}}]);
+    return;
+  }
+  NET.reconnTimer=setTimeout(attemptClientReconnect,Math.min(2000+NET.reconnTries*1500,6000));
+}
+
+/* ══════════════════════════════════════
+   SESSION PERSISTENCE (rejoin via room code after a reload)
+══════════════════════════════════════ */
+const SESSION_KEY='dehla_pakad_session';
+function saveSession(){
+  if(NET.mode!=='client'||NET.mySeat==null||!NET.roomCode) return;
+  try{ localStorage.setItem(SESSION_KEY,JSON.stringify({roomCode:NET.roomCode,seat:NET.mySeat,name:NET.myName||'Player'})); }catch(e){}
+}
+function loadSavedSession(){
+  try{ const raw=localStorage.getItem(SESSION_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; }
+}
+function clearSavedSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
+function showWelcomeBackModal(saved){
+  showModal('\uD83D\uDC4B Welcome Back',
+    '<div style="font-size:12px;color:rgba(255,255,255,.65);margin-bottom:4px;">You were in room <b style="color:var(--gl)">'+saved.roomCode+'</b> as <b>'+saved.name+'</b>. Rejoin that game?</div>',
+    [
+      {lbl:'Rejoin Game',fn:()=>{closeModal();rejoinSavedSession(saved);}},
+      {lbl:'Start Fresh',fn:()=>{clearSavedSession();closeModal();showMainMenu();}},
+    ]);
+}
+async function rejoinSavedSession(saved){
+  if(typeof Peer==='undefined'){fmsg('Could not load networking library — check your connection');clearSavedSession();showMainMenu();return;}
+  NET.mode='client';NET.roomCode=saved.roomCode;NET.mySeat=saved.seat;NET.myName=saved.name||'Player';
+  showModal('\uD83D\uDD0C Rejoining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Reconnecting to '+saved.roomCode+'\u2026</div>',[]);
+  const iceConfig=await getIceConfig();
+  attemptSavedRejoin(saved,iceConfig,false);
+}
+async function attemptSavedRejoin(saved,iceConfig,forceRelay){
+  const cfg=forceRelay?{iceServers:iceConfig.iceServers,iceTransportPolicy:'relay'}:iceConfig;
+  const peer=new Peer(cfg);
+  NET.peer=peer;
+  let settled=false;
+  const timeout=setTimeout(()=>{
+    if(settled) return;
+    if(!forceRelay){
+      showModal('\uD83D\uDD0C Rejoining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Still connecting\u2026 trying a relay route (this can happen on VPNs or restrictive networks)</div>',[]);
+      try{peer.destroy();}catch(e){}
+      attemptSavedRejoin(saved,iceConfig,true);
+    } else {
+      settled=true;
+      showRoomClosedModal();
+    }
+  },JOIN_TIMEOUT_MS);
+  peer.on('open',()=>{
+    const conn=peer.connect('dehla-'+saved.roomCode,{reliable:true});
+    NET.hostConn=conn;
+    conn.on('open',()=>{ settled=true;clearTimeout(timeout); NET.rejoining=true; conn.send({type:'claim',seat:saved.seat,name:saved.name}); });
+    conn.on('data',data=>handleClientMessage(data));
+    conn.on('close',()=>{
+      if(NET.mySeat!=null&&G){ clientReconnect(); }
+      else if(settled) showRoomClosedModal();
+    });
+    conn.on('error',()=>{});
+  });
+  peer.on('error',err=>{
+    console.error(err);
+    if(settled) return;
+    settled=true;clearTimeout(timeout);
+    showRoomClosedModal();
+  });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
+}
+function showRoomClosedModal(){
+  clearSavedSession();
+  showModal('Room Closed','<div style="font-size:12px;color:rgba(255,255,255,.6)">That game session is no longer available — the room may have ended or the host is offline.</div>',[{lbl:'Back to Menu',fn:()=>location.href=location.pathname}]);
+}
+
+/* ══════════════════════════════════════
+   HOST MIGRATION
+   If the host's device vanishes entirely (not just a dropped connection
+   — a full 3-minute reconnect timeout, or an explicit "host left"
+   notice), a connected client can try to take over as host so the game
+   doesn't just die. It re-registers the room's PeerJS ID itself; if that
+   succeeds the original host is confirmed gone and this device becomes
+   the new authority, keeping the live game state it already has and
+   translating old seat numbers via NET.migrationOffset (see toCanonical/
+   toLocalSeat above) so existing players don't need to do anything
+   differently to reconnect.
+══════════════════════════════════════ */
+async function attemptHostTakeover(){
+  if(!G){ location.href=location.pathname; return; }
+  if(typeof Peer==='undefined'){fmsg('Could not load networking library — check your connection');return;}
+  showModal('\uD83D\uDC51 Becoming Host','<div style="font-size:12px;color:rgba(255,255,255,.6)">Trying to take over hosting\u2026</div>',[]);
+  NET.reconnecting=false;
+  if(NET.reconnTimer){clearTimeout(NET.reconnTimer);NET.reconnTimer=null;}
+  try{ if(NET.peer&&!NET.peer.destroyed) NET.peer.destroy(); }catch(e){}
+  const migrationOffset=NET.mySeat;
+  const oldPNAME=[...PNAME];
+  const iceConfig=await getIceConfig();
+  const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:iceConfig});
+  let settled=false;
+  const timeout=setTimeout(()=>{
+    if(settled) return;
+    settled=true;
+    try{peer.destroy();}catch(e){}
+    showModal('Could Not Take Over','<div class="mp-err">Another device may already be hosting, or the room ID is still in use. Try again in a moment.</div>',[{lbl:'Try Again',fn:()=>{closeModal();attemptHostTakeover();}},{lbl:'Back to Menu',fn:()=>location.href=location.pathname}]);
+  },12000);
+  peer.on('open',()=>{
+    settled=true;clearTimeout(timeout);
+    clearSavedSession();
+    NET.mode='host';
+    NET.migrationOffset=migrationOffset;
+    NET.mySeat=0;
+    NET.hostConn=null;
+    NET.conns={};
+    NET.humanSeats=new Set();
+    NET.aiControlled=new Set([...AICTRL]); // already in this device's local numbering
+    NET.names=['','','',''];
+    NET.names[0]=NET.myName||oldPNAME[0]||'You';
+    for(let local=1;local<4;local++){ if(oldPNAME[local]&&!AICTRL.has(local)) NET.names[local]=oldPNAME[local]; }
+    NET.peer=peer;
+    peer.on('connection',conn=>{
+      conn.on('open',()=>{ conn.send({type:'seats',seats:seatSnapshot()}); });
+      conn.on('data',data=>handleHostMessage(conn,data));
+      conn.on('close',()=>{ if(conn._seat!=null) onSeatDisconnect(conn._seat); });
+      conn.on('error',()=>{ if(conn._seat!=null) onSeatDisconnect(conn._seat); });
+    });
+    startHeartbeat();
+    closeModal();
+    fmsg('You are now the host!');
+    document.getElementById('roombar').classList.add('show');document.body.classList.add('has-roombar');
+    document.getElementById('rb-code').textContent=NET.roomCode;
+    updateBotbarVisibility();
+    render();
+    if(G&&!G.gameOver) maybeAI(600); // resume turn logic under this device's own authority
+  });
+  peer.on('error',err=>{
+    console.error(err);
+    if(settled) return;
+    settled=true;clearTimeout(timeout);
+    showModal('Could Not Take Over','<div class="mp-err">Another device may already be hosting, or the room ID is still in use. Try again in a moment.</div>',[{lbl:'Try Again',fn:()=>{closeModal();attemptHostTakeover();}},{lbl:'Back to Menu',fn:()=>location.href=location.pathname}]);
+  });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
+}
+
+/* ── serialize / rotate state for network transport ── */
+function serializeG(){
+  if(!G) return null;
+  const {revTimer,...rest}=G;
+  return JSON.parse(JSON.stringify({...rest,wonIds:[...G.wonIds],seenCards:[...G.seenCards]}));
+}
+/* ── canonical player numbering ──
+   "Player N" is always based on the fixed canonical seat (host is
+   always Player 1), never on a viewer's own rotated position — so the
+   same person is always the same number for everyone at the table,
+   and keeps that number across a leave/rejoin. */
+function canonicalSeatForLocal(local){
+  if(NET.mode==='host') return toCanonical(local);
+  if(NET.mode==='client'&&NET.mySeat!=null) return (NET.mySeat+local)%4;
+  return local;
+}
+function playerNumLabel(local){ return 'Player '+(canonicalSeatForLocal(local)+1); }
+// Canonical seat -> team-position label (0=A1,1=B1,2=A2,3=B2). Used for
+// any seat with no human in it, so an empty/AI seat reads "Player B1"
+// rather than the meaningless "Player 2".
+const SEAT_TEAMPOS=['A1','B1','A2','B2'];
+function botLabel(local){ return 'Player '+SEAT_TEAMPOS[canonicalSeatForLocal(local)]; }
+const DEFAULT_POS=['You','Player B1','Player A2','Player B2'];
+/* ── host-migration seat translation ──
+   Normally a host's own local seat numbering IS the canonical numbering
+   (migrationOffset===0, host is always local/canonical seat 0). If this
+   device took over hosting mid-game (see attemptHostTakeover), its own
+   local seat 0 is really the ORIGINAL canonical seat `migrationOffset` —
+   everything sent over the wire (seat numbers, state) must stay in the
+   original canonical numbering so existing clients' fixed NET.mySeat and
+   their own rotSeat() math keep working completely unchanged. */
+function toCanonical(local){ return NET.migrationOffset?((local+NET.migrationOffset)%4):local; }
+function toLocalSeat(canonical){ return NET.migrationOffset?((canonical-NET.migrationOffset+4)%4):canonical; }
+function namesForBroadcast(){
+  const arr=['','','',''];
+  for(let local=0;local<4;local++){
+    const canonical=toCanonical(local);
+    arr[canonical]= local===0 ? (NET.names[0]||'You') : (NET.conns[local] ? (NET.names[local]||'Player') : null);
+  }
+  return arr;
+}
+function applyPNAMEHost(){
+  for(let s=0;s<4;s++) PNAME[s]= s===0 ? 'You' : (NET.conns[s] ? (NET.names[s]||'Player') : botLabel(s));
+}
+/* Client-side equivalent of applyPNAMEHost — used while sitting in the
+   lobby (before the first game-state broadcast arrives), so the table
+   behind the "Waiting Room" modal shows real joined names instead of
+   the default Left/Top/Right placeholders. */
+function applyPNAMEClientFromLobby(players){
+  const mySeat=NET.mySeat;
+  if(mySeat==null){
+    // Haven't claimed a seat yet — nothing to rotate against.
+    return;
+  }
+  for(let i=0;i<4;i++)PNAME[i]=botLabel(i);
+  PNAME[0]='You';
+  players.forEach(p=>{
+    const local=rotSeat(mySeat,p.seat);
+    if(local===0)return;
+    PNAME[local]= p.connected ? (p.seat===mySeat?(NET.myName||'You'):(p.name||'Player')) : botLabel(local);
+  });
+}
+/* Re-index a serialized G snapshot (which is in THIS device's own local
+   seat numbering) into original-canonical numbering for the wire. No-op
+   (returns payload unchanged) unless this device migrated into hosting. */
+function remapPayloadToCanonical(payload){
+  if(!NET.migrationOffset) return payload;
+  const remapArr4=arr=>{const out=[null,null,null,null];for(let local=0;local<4;local++)out[toCanonical(local)]=arr[local];return out;};
+  const remapSeat=v=>(v==null||v<0)?v:toCanonical(v);
+  const teamFlip=NET.migrationOffset%2===1;
+  const remapTeam=arr=>(!arr)?arr:(teamFlip?[arr[1],arr[0]]:arr);
+  return {
+    ...payload,
+    hands:remapArr4(payload.hands),
+    initHands:remapArr4(payload.initHands),
+    first5:remapArr4(payload.first5),
+    voids:remapArr4(payload.voids),
+    handSnaps:remapArr4(payload.handSnaps),
+    trick:payload.trick.map(t=>({p:remapSeat(t.p),card:t.card})),
+    cur:remapSeat(payload.cur),
+    trumpBy:remapSeat(payload.trumpBy),
+    prevW:remapSeat(payload.prevW),
+    lastTrickW:remapSeat(payload.lastTrickW),
+    tTens:remapTeam(payload.tTens),
+    tTricks:remapTeam(payload.tTricks),
+    tTenCards:remapTeam(payload.tTenCards),
+    log:(payload.log||[]).map(le=>({
+      ...le,
+      plays:le.plays.map(pl=>({p:remapSeat(pl.p),card:pl.card})),
+      winner:remapSeat(le.winner),
+      snapshots:remapArr4(le.snapshots),
+      trumpBy:remapSeat(le.trumpBy),
+      heapCtx:{...le.heapCtx,prevW:remapSeat(le.heapCtx.prevW),collectedBy:remapSeat(le.heapCtx.collectedBy)},
+    })),
+  };
+}
+function broadcastState(){
+  const payload=remapPayloadToCanonical(serializeG());
+  if(!payload) return;
+  applyPNAMEHost();
+  NET.broadcast({type:'state',payload,names:namesForBroadcast(),aiSeats:[...NET.aiControlled].map(toCanonical),roomCoat:ROOMCOAT});
+}
+function rotSeat(mySeat,s){return (s==null||s<0)?s:(s-mySeat+4)%4;}
+function rotArr4(mySeat,arr){const out=[null,null,null,null];for(let s=0;s<4;s++)out[rotSeat(mySeat,s)]=arr[s];return out;}
+function rotTeamArr(mySeat,arr){const f=mySeat%2;const out=[null,null];out[0^f]=arr[0];out[1^f]=arr[1];return out;}
+function applyRemoteState(payload,names,aiSeats){
+  const mySeat=NET.mySeat;
+  AICTRL=new Set((aiSeats||[]).map(s=>rotSeat(mySeat,s)));
+  const rot=s=>rotSeat(mySeat,s);
+  const prevSel=(G&&typeof G.sel==='number')?G.sel:-1;
+  closeModal(); // dismiss any lobby/waiting modal now that real game state has arrived
+  G={
+    ...payload,
+    hands:rotArr4(mySeat,payload.hands),
+    initHands:rotArr4(mySeat,payload.initHands),
+    first5:rotArr4(mySeat,payload.first5),
+    voids:rotArr4(mySeat,payload.voids),
+    handSnaps:rotArr4(mySeat,payload.handSnaps),
+    trick:payload.trick.map(t=>({p:rot(t.p),card:t.card})),
+    cur:rot(payload.cur),
+    trumpBy:rot(payload.trumpBy),
+    prevW:rot(payload.prevW),
+    lastTrickW:rot(payload.lastTrickW),
+    tTens:rotTeamArr(mySeat,payload.tTens),
+    tTricks:rotTeamArr(mySeat,payload.tTricks),
+    tTenCards:rotTeamArr(mySeat,payload.tTenCards),
+    wonIds:new Set(payload.wonIds),
+    seenCards:new Set(payload.seenCards||[]),
+    log:(payload.log||[]).map(le=>({
+      ...le,
+      plays:le.plays.map(pl=>({p:rot(pl.p),card:pl.card})),
+      winner:rot(le.winner),
+      snapshots:rotArr4(mySeat,le.snapshots),
+      trumpBy:rot(le.trumpBy),
+      heapCtx:{...le.heapCtx,prevW:rot(le.heapCtx.prevW),collectedBy:rot(le.heapCtx.collectedBy)},
+    })),
+    sel:prevSel,
+    revTimer:null,
+  };
+  if(G.cur!==0) G.sel=-1;
+  if(names){
+    const local=rotArr4(mySeat,names);
+    for(let i=0;i<4;i++) PNAME[i]= i===0 ? 'You' : (local[i]!=null ? local[i] : botLabel(i));
+  }
+  render();
+  document.getElementById('histbtn').style.display=G.gameOver?'inline-block':'none';
+}
+
+/* ── HOST ── */
+async function hostRoom(name){
+  if(typeof Peer==='undefined'){fmsg('Could not load networking library — check your connection');return;}
+  NET.mode='host';NET.mySeat=0;NET.humanSeats=new Set();NET.conns={};
+  NET.aiControlled=new Set();NET.migrationOffset=0;
+  NET.names[0]=name||'You';
+  NET.roomCode=genCode();
+  ROOMCOAT=[0,0];STARTER_SEAT=0; // fresh room — game 1 starts A1, coat history purged
+  updateRoomCoatUI(ROOMCOAT);
+  updateBotbarVisibility();
+  showModal('🎴 Creating Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Setting up your room…</div>',[]);
+  const iceConfig=await getIceConfig();
+  const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:iceConfig});
+  NET.peer=peer;
+  peer.on('open',()=>{ showRoomLobby(); });
+  peer.on('connection',conn=>{
+    conn.on('open',()=>{ conn.send({type:'seats',seats:seatSnapshot()}); });
+    conn.on('data',data=>handleHostMessage(conn,data));
+    conn.on('close',()=>{ if(conn._seat!=null) onSeatDisconnect(conn._seat); });
+    conn.on('error',()=>{ if(conn._seat!=null) onSeatDisconnect(conn._seat); });
+  });
+  peer.on('error',err=>{ console.error(err); fmsg('Room error — please try again'); });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
+  startHeartbeat();
+}
+/* ── heartbeat: catches seats that die silently ──
+   A phone whose app gets force-closed, killed by the OS, or loses
+   signal entirely often never fires PeerJS's 'close'/'error' events —
+   there's no clean teardown to detect. Without this, that seat would
+   sit "connected" forever and the 120s AI-takeover timer would only
+   ever start once it happened to become that seat's turn AND nothing
+   else confirms it's actually still there. Pinging periodically and
+   watching for a reply gives the host a reliable, bounded way to
+   notice a dead seat and hand it to AI even if no WebRTC event ever
+   fires for it. */
+const HEARTBEAT_INTERVAL_MS=10000;
+const HEARTBEAT_DEAD_MS=35000;
+function startHeartbeat(){
+  if(NET.hbTimer)return;
+  NET.hbTimer=setInterval(()=>{
+    if(NET.mode!=='host'){ clearInterval(NET.hbTimer);NET.hbTimer=null;return; }
+    const now=Date.now();
+    for(const s in NET.conns){
+      const conn=NET.conns[s];
+      if(!conn)continue;
+      if(conn._lastPong==null)conn._lastPong=now; // grace period right after connecting
+      if(now-conn._lastPong>HEARTBEAT_DEAD_MS){
+        try{conn.close();}catch(e){}
+        onSeatDisconnect(Number(s));
+        continue;
+      }
+      try{ if(conn.open) conn.send({type:'ping'}); }catch(e){}
+    }
+  },HEARTBEAT_INTERVAL_MS);
+}
+function seatSnapshot(){
+  return [1,2,3].map(local=>({seat:toCanonical(local),name:NET.conns[local]?(NET.names[local]||'Player'):null,taken:!!NET.conns[local]}));
+}
+/* A dropped WebRTC connection (backgrounded tab, brief signal loss, app
+   switch to reply on WhatsApp, etc) does NOT immediately hand the seat to
+   AI — the player stays "theirs" and the 120s per-turn timer (see
+   scheduleTurnTimeout) gives them a real window to reconnect and resume.
+   Only an explicit "leaving" message (see handleHostMessage) drops the
+   seat instantly. */
+function onSeatDisconnect(seat){
+  delete NET.conns[seat];
+  sendLobbyUpdate();
+  // If it's already their turn, make sure a timeout is running so the
+  // game doesn't stall forever if they never come back.
+  if(G&&!G.gameOver&&G.cur===seat&&NET.humanSeats.has(seat)) scheduleTurnTimeout();
+}
+function onSeatLeavePermanently(seat){
+  delete NET.conns[seat];
+  NET.humanSeats.delete(seat);
+  NET.aiControlled.delete(seat);
+  clearTurnTimer();
+  sendLobbyUpdate();
+  if(G&&!G.gameOver&&G.cur===seat) maybeAI(600);
+}
+function sendLobbyUpdate(){
+  applyPNAMEHost();
+  renderNames(); // refresh the table nameplates behind the lobby modal right away
+  const players=[0,1,2,3].map(local=>({seat:toCanonical(local),name:local===0?NET.names[0]:(NET.conns[local]?NET.names[local]:''),connected:local===0?true:!!NET.conns[local]}));
+  NET.broadcast({type:'lobby',players,roomCode:NET.roomCode});
+  updateRoombarPlayers(players);
+  if(NET.inLobby) showRoomLobby();
+}
+function handleHostMessage(conn,data){
+  if(!data||!data.type) return;
+  if(data.type==='pong'){ conn._lastPong=Date.now(); return; }
+  if(data.type==='claim'){
+    const canonicalSeat=data.seat;
+    const seat=toLocalSeat(canonicalSeat);
+    if(![1,2,3].includes(seat)||NET.conns[seat]){
+      conn.send({type:'seat_taken',seats:seatSnapshot()});
+      return;
+    }
+    NET.conns[seat]=conn;conn._seat=seat;
+    NET.names[seat]=(data.name||'Player').slice(0,16);
+    NET.humanSeats.add(seat);
+    NET.aiControlled.delete(seat); // a fresh human claim always starts back in human control
+    conn.send({type:'welcome',seat:canonicalSeat});
+    sendLobbyUpdate();
+    fmsg(NET.names[seat]+' joined the room!');
+    if(G&&!G.gameOver){
+      render(); // catch the new player up on the live state
+      if(G.cur===seat) scheduleTurnTimeout(); // make sure their turn is covered by the grace timer
+    }
+    return;
+  }
+  const seat=conn._seat;
+  if(seat==null) return; // ignore anything before a seat is claimed
+  if(data.type==='play'){
+    if(!G||G.gameOver||G.cur!==seat) return;
+    if(NET.aiControlled.has(seat)) return; // AI has this turn, ignore a stray manual play
+    clearTurnTimer();
+    const idx=G.hands[seat].findIndex(c=>c.id===data.cardId);
+    if(idx<0) return;
+    if(!getOk(seat).has(idx)) return;
+    doPlay(seat,idx);
+    return;
+  }
+  if(data.type==='leaving'){ onSeatLeavePermanently(seat); return; }
+  if(data.type==='reqNewGame'){ return; } // new-game is host-only now — ignore a stray client request
+  if(data.type==='handover'){ hostSetAIControl(seat,true); return; }
+  if(data.type==='reclaim'){ hostSetAIControl(seat,false); return; }
+}
+function showRoomLobby(){
+  NET.inLobby=true;
+  applyPNAMEHost();
+  renderNames();
+  document.getElementById('roombar').classList.add('show');document.body.classList.add('has-roombar');
+  document.getElementById('rb-code').textContent=NET.roomCode;
+  let rows='';
+  for(let s=0;s<4;s++){
+    const conn=NET.conns[s];
+    const nm=s===0?(NET.names[0]+' (You)'):(conn?NET.names[s]:'— empty —');
+    const tag=(s!==0&&!conn)?' <span class="bot">— plays as AI if you start now</span>':'';
+    rows+='<div><span class="seat-tag">'+SEATLBL[toCanonical(s)]+'</span> '+nm+tag+'</div>';
+  }
+  const body=
+    '<div class="mp-share"><code style="font-size:18px;letter-spacing:3px;">'+NET.roomCode+'</code>'+
+      '<button class="mp-copybtn" onclick="copyRoomCode()">Copy</button>'+
+      '<button class="mp-copybtn mp-sharebtn" onclick="shareRoomCode()">📤 Share</button>'+
+    '</div>'+
+    '<div style="font-size:11px;color:rgba(255,255,255,.55)">Share this code — up to 3 friends can join by entering it on the app\'s Join Room screen.</div>'+
+    '<div class="mp-players">'+rows+'</div>'+
+    '<div style="font-size:10px;color:rgba(255,255,255,.4)">Empty seats play as AI bots.</div>';
+  showModal('👑 Room '+NET.roomCode,body,[
+    {lbl:'Start Game',fn:()=>{NET.inLobby=false;closeModal();showDifficultyModal(newGame);}},
+    {lbl:'Leave',fn:leaveRoom}
+  ]);
+}
+
+/* ── CLIENT ──
+   Players on different networks (mobile data vs wifi, a VPN, a strict
+   corporate/carrier NAT) often can't establish a direct peer-to-peer
+   path — that's exactly what the TURN relay in ICE_SERVERS is for, but
+   if even the relay attempt is blocked or just slow, PeerJS's own
+   'error' event doesn't always fire — the connection can silently sit
+   there never opening. Without a timeout, that leaves the person
+   staring at "Connecting…" forever with no way forward. This adds an
+   explicit timeout, and if the first attempt (which prefers a direct
+   path when possible, for lower latency) doesn't open in time, retries
+   once forcing TURN-relay-only — the option most likely to succeed
+   when a VPN or restrictive NAT is blocking direct/STUN candidates. */
+const JOIN_TIMEOUT_MS=18000;
+async function joinRoom(code){
+  if(typeof Peer==='undefined'){fmsg('Could not load networking library — check your connection');return;}
+  NET.mode='client';NET.roomCode=code;
+  showModal('🔌 Joining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Connecting…</div>',[]);
+  const iceConfig=await getIceConfig();
+  attemptJoin(code,iceConfig,false);
+}
+function attemptJoin(code,iceConfig,forceRelay){
+  let settled=false;
+  const cfg=forceRelay?{iceServers:iceConfig.iceServers,iceTransportPolicy:'relay'}:iceConfig;
+  const peer=new Peer(cfg);
+  NET.peer=peer;
+  const timeout=setTimeout(()=>{
+    if(settled)return;
+    settled=true;
+    try{peer.destroy();}catch(e){}
+    if(!forceRelay){
+      // Direct/STUN path never opened in time — retry forcing the TURN
+      // relay only, which works even when direct paths are blocked.
+      showModal('🔌 Joining Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Still connecting… trying a relay route (this can happen on VPNs or restrictive networks)</div>',[]);
+      attemptJoin(code,iceConfig,true);
+    } else {
+      showModal('Could Not Connect','<div class="mp-err">Couldn\'t reach the host after trying a direct and a relay connection. This can happen on some VPNs or very restrictive networks — try turning off the VPN, switching networks, or checking the room code.</div>',[{lbl:'Try Again',fn:()=>{closeModal();showJoinRoomModal(code);}}]);
+    }
+  },JOIN_TIMEOUT_MS);
+  peer.on('open',()=>{
+    const conn=peer.connect('dehla-'+code,{reliable:true});
+    NET.hostConn=conn;
+    conn.on('open',()=>{ settled=true; clearTimeout(timeout); });
+    conn.on('data',data=>handleClientMessage(data));
+    conn.on('close',()=>{
+      if(NET.mySeat!=null&&G){ clientReconnect(); }
+      else if(settled) showModal('Connection Lost','<div style="font-size:12px;color:rgba(255,255,255,.6)">The host left or the connection dropped.</div>',[{lbl:'Back to Menu',fn:()=>location.href=location.pathname}]);
+    });
+    conn.on('error',()=>{ /* let the JOIN_TIMEOUT_MS watchdog above handle it */ });
+  });
+  peer.on('error',err=>{
+    console.error(err);
+    if(settled)return;
+    settled=true;clearTimeout(timeout);
+    showModal('Could Not Connect','<div class="mp-err">Room not found, or the host is offline. Check the code and try again.</div>',[{lbl:'Try Again',fn:()=>{closeModal();showJoinRoomModal(code);}}]);
+  });
+  peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
+}
+function handleClientMessage(data){
+  if(!data||!data.type) return;
+  if(data.type==='seats'){
+    if(NET.reconnecting||NET.rejoining) return; // reclaiming our known seat directly, no picker needed
+    if(data.seats.every(s=>s.taken)){
+      showModal('Room Full','<div style="font-size:12px;color:rgba(255,255,255,.6)">This room already has 4 players.</div>',[{lbl:'Back',fn:()=>location.href=location.pathname}]);
+    } else showSeatPicker(data.seats);
+    return;
+  }
+  if(data.type==='seat_taken'){
+    if(NET.reconnecting){ scheduleClientRetry(); return; } // our old seat got taken by AI/host churn — retry shortly
+    NET.rejoining=false;
+    fmsg('That seat was just taken — pick another'); showSeatPicker(data.seats); return;
+  }
+  if(data.type==='welcome'){
+    NET.mySeat=data.seat;
+    NET.rejoining=false;
+    saveSession();
+    document.getElementById('roombar').classList.add('show');document.body.classList.add('has-roombar');
+    document.getElementById('rb-code').textContent=NET.roomCode||'';
+    updateBotbarVisibility();
+    const db=document.getElementById('diffbadge'); if(db) db.style.display='none';
+    if(NET.reconnecting){
+      NET.reconnecting=false;
+      if(NET.reconnTimer){clearTimeout(NET.reconnTimer);NET.reconnTimer=null;}
+      setNetStatus('✓ Reconnected','connected');
+      fmsg('Back online!');
+    }
+    return;
+  }
+  if(data.type==='hostLeaving'){
+    NET.reconnecting=false;
+    if(NET.reconnTimer){clearTimeout(NET.reconnTimer);NET.reconnTimer=null;}
+    const canTakeover=!!G;
+    showModal('Host Left',
+      '<div style="font-size:12px;color:rgba(255,255,255,.6)">The host left the room.'+(canTakeover?' You can try to take over as host to keep the game going, or head back to the menu.':'')+'</div>',
+      canTakeover
+        ?[{lbl:'Become Host',fn:()=>{closeModal();attemptHostTakeover();}},{lbl:'Back to Menu',fn:()=>{clearSavedSession();location.href=location.pathname;}}]
+        :[{lbl:'Back to Menu',fn:()=>{clearSavedSession();location.href=location.pathname;}}]);
+    return;
+  }
+  if(data.type==='lobby'){
+    NET.roomCode=data.roomCode;
+    document.getElementById('rb-code').textContent=NET.roomCode;
+    updateRoombarPlayers(data.players);
+    applyPNAMEClientFromLobby(data.players);
+    renderNames(); // show real names on the table behind the modal, not just Left/Right placeholders
+    if(!G) renderClientLobbyWait(data.players);
+    return;
+  }
+  if(data.type==='state'){ applyRemoteState(data.payload,data.names,data.aiSeats); if(data.roomCoat) updateRoomCoatUI(data.roomCoat); return; }
+  if(data.type==='sound'){ playSndByName(data.name); return; }
+  if(data.type==='turnTimer'){
+    const localSeat=rotSeat(NET.mySeat,data.seat);
+    TURNCD={seat:localSeat,endsAt:data.endsAt};
+    startTurnCDTicker();
+    return;
+  }
+  if(data.type==='turnTimerClear'){ TURNCD=null; stopTurnCDTicker(); renderNames(); return; }
+  if(data.type==='ping'){ NET.send({type:'pong'}); return; }
+  if(data.type==='modal'){
+    showModal(data.title,data.body,[{lbl:'View History',fn:()=>{closeModal();showHist();}},{lbl:'New Game',fn:newGame}],true);
+    return;
+  }
+  if(data.type==='roomCoat'){ updateRoomCoatUI(data.counts); return; }
+  if(data.type==='fmsg'){ fmsg(data.txt,data.top,true); return; }
+}
+const SEAT_ROLE=['','Player B1 (Left)','Player A2 — Host\'s Partner','Player B2 (Right)'];
+function showSeatPicker(seats){
+  const rows=seats.map(s=>{
+    const disabled=s.taken?'disabled':'';
+    const status=s.taken?(' — taken by '+s.name):' — open';
+    return '<button class="btn" '+disabled+' style="width:100%;'+(s.taken?'opacity:.4;':'')+'" onclick="pickSeat('+s.seat+')">'+SEAT_ROLE[s.seat]+status+'</button>';
+  }).join('<div style="height:6px"></div>');
+  showModal('Choose Your Seat',
+    '<div class="mp-label">Your name</div>'+
+    '<input class="mp-input" id="mp-seat-name" maxlength="16" placeholder="e.g. Priya">'+
+    '<div class="mp-label">Pick a seat</div>'+
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">'+rows+'</div>',
+    [{lbl:'Cancel',fn:leaveRoom}]);
+}
+function pickSeat(seat){
+  const v=(document.getElementById('mp-seat-name').value||'').trim();
+  if(!v){fmsg('Enter your name to continue');return;}
+  NET.myName=v;
+  showModal('Joining…','<div style="font-size:12px;color:rgba(255,255,255,.6)">Claiming your seat…</div>',[]);
+  NET.hostConn.send({type:'claim',seat,name:v});
+}
+function renderClientLobbyWait(players){
+  const rows=players.map(p=>{
+    const nm=p.seat===NET.mySeat?(NET.myName+' (You)'):(p.connected?(p.name||'Player'):'— empty —');
+    return '<div><span class="seat-tag">'+SEATLBL[p.seat]+'</span> '+nm+'</div>';
+  }).join('');
+  showModal('⏳ Waiting Room','<div class="mp-players">'+rows+'</div><div style="font-size:11px;color:rgba(255,255,255,.5)">Waiting for the host to start the game…</div>',[{lbl:'Leave',fn:()=>location.href=location.pathname}]);
+}
+function updateRoombarPlayers(players){
+  const n=players.filter(p=>p.connected).length;
+  const el=document.getElementById('rb-players');
+  if(el) el.textContent=n+'/4 seated';
+}
+
+/* ══════════════════════════════════════
+   MENUS / INIT
+══════════════════════════════════════ */
+function showDifficultyModal(onStart){
+  showModal('\uD83C\uDFB4 Dehla Pakad',
+  '<b>Teams:</b> Team A (you &amp; partner, across) &nbsp;vs&nbsp; Team B<br><br>'+
+  '\u2705 5 cards dealt first<br>'+
+  '\u2705 Follow suit \u2014 trump opens when void<br>'+
+  '\u2705 Opener\'s hand revealed after trick<br>'+
+  '\u2705 Same <b>person</b> wins 2 consecutive = collect heap<br>'+
+  '\u2705 First 10 in heap resets it once<br>'+
+  '\u2705 All 4 tens = Coat \uD83D\uDC51<br><br>'+
+  '<div style="margin:10px 0;font-family:Cinzel,serif;font-size:11px;color:var(--gd);">SELECT DIFFICULTY:</div>'+
+  '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">'+
+  '<button id="diffbtn1" class="diffopt easy'+(DIFFICULTY===1?' sel':'')+'" onclick="setDiff(1)">🟢 Easy</button>'+
+  '<button id="diffbtn2" class="diffopt med'+(DIFFICULTY===2?' sel':'')+'" onclick="setDiff(2)">⚡ Medium</button>'+
+  '<button id="diffbtn3" class="diffopt hard'+(DIFFICULTY===3?' sel':'')+'" onclick="setDiff(3)">🔥 Hard</button>'+
+  '</div>',
+  [{lbl:'Deal Cards',fn:onStart}]);
+}
+function showMainMenu(){
+  showModal('\uD83C\uDFB4 Dehla Pakad',
+    '<div style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:4px;">Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>',
+    [
+      {lbl:'Play vs AI',fn:()=>{closeModal();showDifficultyModal(newGame);}},
+      {lbl:'Multiplayer',fn:()=>{closeModal();showMultiplayerMenu();}},
+    ],true);
+}
+function showMultiplayerMenu(){
+  showModal('\uD83D\uDC65 Multiplayer',
+    '<div style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:6px;">Create a room and share the room code, or join a friend\'s room using their code.</div>',
+    [
+      {lbl:'Create Room',fn:()=>{closeModal();showCreateRoomModal();}},
+      {lbl:'Join Room',fn:()=>{closeModal();showJoinRoomModal('');}},
+      {lbl:'Back',fn:()=>{closeModal();showMainMenu();}},
+    ],true);
+}
+function showCreateRoomModal(){
+  showModal('Create Room',
+    '<div class="mp-label">Your name</div>'+
+    '<input class="mp-input" id="mp-name-input" maxlength="16" placeholder="e.g. Rahul">',
+    [
+      {lbl:'Create',fn:()=>{
+        const v=(document.getElementById('mp-name-input').value||'').trim();
+        if(!v){fmsg('Enter your name to continue');return;}
+        closeModal();hostRoom(v);
+      }},
+      {lbl:'Back',fn:()=>{closeModal();showMultiplayerMenu();}},
+    ],true);
+}
+function showJoinRoomModal(prefillCode){
+  showModal('Join Room',
+    '<div class="mp-label">Room code</div>'+
+    '<input class="mp-input" id="mp-code-input" maxlength="8" style="text-transform:uppercase;" placeholder="e.g. AB12C" value="'+(prefillCode||'').toUpperCase()+'">',
+    [
+      {lbl:'Connect',fn:()=>{
+        const code=roomCodeFromInput(document.getElementById('mp-code-input').value);
+        if(!code){fmsg('Enter a room code');return;}
+        closeModal();joinRoom(code);
+      }},
+      {lbl:'Back',fn:()=>{closeModal();showMultiplayerMenu();}},
+    ],true);
+}
+
+setupNetworkResilience();
+updateBotbarVisibility();
+{
+  // Arriving via a shared "Share" link (?room=CODE) — jump straight to
+  // the join screen with the code prefilled instead of the main menu.
+  const params=new URLSearchParams(location.search);
+  const roomFromLink=roomCodeFromInput(params.get('room'));
+  const saved=roomFromLink?null:loadSavedSession();
+  if(saved) showWelcomeBackModal(saved);
+  else if(roomFromLink) showJoinRoomModal(roomFromLink);
+  else showMainMenu();
+}
+</script>
+</body>
+</html>

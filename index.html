@@ -1325,7 +1325,7 @@ function sweepAndCollect(){
   setTimeout(()=>{
     SND('sweep');
     SB_ID.forEach(id=>{const c=document.getElementById(id).querySelector('.card');if(c)c.classList.add('sweep');});
-    setTimeout(()=>{clearSlots();clearBuf();render();},520);
+    setTimeout(()=>{clearSlots();clearBuf();if(!G.gameOver)render();},520);
   },1350);
 }
 function renderBuf(){

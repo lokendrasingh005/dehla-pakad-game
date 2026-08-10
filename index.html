@@ -1393,10 +1393,10 @@ function endHand(){
     title=iWon?(isCoat?'\uD83C\uDF89 TEAM A WINS \u2014 COAT! \uD83D\uDC51':'\uD83C\uDFC6 TEAM A WINS!'):(isCoat?'\uD83D\uDC51 TEAM B WINS \u2014 COAT!':'\uD83C\uDFC6 TEAM B WINS!');
   }
   updateHeapTens();render();
-  document.getElementById('histbtn').style.display='inline-block';
+  document.getElementById('histbtn').style.display='none';
   const coat=isCoat?'<div class="big">\uD83D\uDC51</div><div style="color:var(--gl);font-family:Cinzel;font-size:13px;letter-spacing:1px;margin-bottom:8px">COAT \u2014 ALL 4 TENS CAPTURED!</div>':(!isDraw?'<div class="big">\uD83C\uDF89</div>':'');
   const body=coat+'<div class="scorerow"><div class="scorebox'+(iWon===true?' win':'')+'"><div class="sbt">Team A</div><div class="sbn">'+u+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+ut+' tricks</div></div><div class="scorebox'+(iWon===false?' win':'')+'"><div class="sbt">Team B</div><div class="sbn">'+t+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+tt+' tricks</div></div></div>';
-  showModal(title,body,NET.mode==='client'?[{lbl:'View History',fn:()=>{closeModal();showHist();}}]:[{lbl:'View History',fn:()=>{closeModal();showHist();}},{lbl:'New Game',fn:newGame}],true);
+  showModal(title,body,NET.mode==='client'?[]:[{lbl:'New Game',fn:newGame}],true);
   if(NET.mode==='host')NET.broadcast({type:'modal',title,body});
 }
 
@@ -3347,7 +3347,7 @@ function applyRemoteState(payload,names,aiSeats){
     for(let i=0;i<4;i++) PNAME[i]= i===0 ? 'You' : (local[i]!=null ? local[i] : botLabel(i));
   }
   render();
-  document.getElementById('histbtn').style.display=G.gameOver?'inline-block':'none';
+  document.getElementById('histbtn').style.display='none';
 }
 
 /* ── HOST ── */
@@ -3622,7 +3622,7 @@ function handleClientMessage(data){
   if(data.type==='turnTimerClear'){ TURNCD=null; stopTurnCDTicker(); renderNames(); return; }
   if(data.type==='ping'){ NET.send({type:'pong'}); return; }
   if(data.type==='modal'){
-    showModal(data.title,data.body,[{lbl:'View History',fn:()=>{closeModal();showHist();}},{lbl:'New Game',fn:newGame}],true);
+    showModal(data.title,data.body,[{lbl:'New Game',fn:newGame}],true);
     return;
   }
   if(data.type==='roomCoat'){ updateRoomCoatUI(data.counts); return; }

@@ -333,6 +333,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:
 
 /* ═══ PENDING BUFFER ═══ */
 #trickbuf{position:absolute;bottom:5px;right:5px;width:52px;height:62px;pointer-events:none;z-index:10;}
+.heap-fly{position:fixed!important;margin:0!important;z-index:9999;pointer-events:none;transition:transform .5s cubic-bezier(.16,.84,.44,1),opacity .5s ease .12s;will-change:transform,opacity;}
 .bufcard{
   position:absolute;width:30px;height:44px;border-radius:5px;
   background:linear-gradient(145deg,#1a237e,#0d47a1);
@@ -892,6 +893,10 @@ function snd_reset(){
   tone(440,.2,.08,'sine',.1);
 }
 function snd_deal(){noise(.06,120,.2);}
+function snd_whoosh(){
+  noise(.32,7,.16);
+  tone(700,.28,.05,'sine');
+}
 
 /* Sound events must reach every device in a multiplayer room, not just
    the host (the host is the only device that actually runs the game
@@ -901,7 +906,7 @@ function snd_deal(){noise(.06,120,.2);}
    Client devices never call SND() themselves (they don't run game
    logic), they just play whatever sound name the host sends them. */
 const SNDMAP={card:snd_card,sweep:snd_sweep,collect:snd_collect,ten:snd_ten,
-  trump:snd_trump,win:snd_win,lose:snd_lose,coat:snd_coat,reset:snd_reset,deal:snd_deal};
+  trump:snd_trump,win:snd_win,lose:snd_lose,coat:snd_coat,reset:snd_reset,deal:snd_deal,whoosh:snd_whoosh};
 let MUTED=localStorage.getItem('dc_muted')==='1';
 function toggleMute(){
   MUTED=!MUTED;
@@ -1257,7 +1262,7 @@ function resolve(){
       G.hCounts[team]+=G.heapN;
       G.firstTenCollected=true; // first bankable heap always contains a ten by the check above
       const hn=G.heapN;
-      setTimeout(()=>{collectHeapVisual(team,hn);SND('collect');fmsg(PNAME[W]+' collects '+hn+' tricks! 🎉'+(hasTen?' (+ten!)':''));},350);
+      setTimeout(()=>{collectHeapVisual(team,hn,W);SND('collect');fmsg(PNAME[W]+' collects '+hn+' tricks! 🎉'+(hasTen?' (+ten!)':''));},350);
       G.heapN=0;G.prevW=-1;G.firstH=true;G.heapBuf=[];G.heapHasTen=false;
       collected=true;
       // Update log entry with collection info
@@ -1307,7 +1312,7 @@ function resolve(){
       G.tTricks[team]+=G.heapN;
       G.heapBuf.forEach(c=>{if(c.r==='10'&&!G.wonIds.has(c.id)){G.wonIds.add(c.id);G.tTens[team]++;G.tTenCards[team].push(c.s);}});
       G.hCounts[team]+=G.heapN;
-      setTimeout(()=>collectHeapVisual(team,G.heapN),300);
+      setTimeout(()=>collectHeapVisual(team,G.heapN,W),300);
       G.heapN=0;G.heapBuf=[];G.heapHasTen=false;
     }
     setTimeout(()=>{sortAll();render();endHand();},2100);
@@ -1444,10 +1449,38 @@ function clearHeaps(){
   document.getElementById('htmcnt').textContent='0 tricks';
   ['htens-us','htens-tm'].forEach(id=>{document.getElementById(id).innerHTML='';});
 }
-function collectHeapVisual(team,n){
+function collectHeapVisual(team,n,seat){
   const cnt=document.getElementById(team===0?'huscnt':'htmcnt');
   cnt.textContent=G.hCounts[team]+' tricks';
   cnt.classList.add('pop');setTimeout(()=>cnt.classList.remove('pop'),400);
+  if(seat!=null) flyHeapToPlayer(seat);
+}
+function flyHeapToPlayer(seat){
+  const nameEl=document.getElementById('nm'+seat);
+  if(!nameEl) return;
+  const tRect=nameEl.getBoundingClientRect();
+  const tx=tRect.left+tRect.width/2, ty=tRect.top+tRect.height/2;
+  let any=false;
+  SB_ID.forEach((id,i)=>{
+    const slot=document.getElementById(id);
+    const card=slot&&slot.querySelector('.card');
+    if(!card) return;
+    any=true;
+    const r=card.getBoundingClientRect();
+    const clone=card.cloneNode(true);
+    clone.className='card heap-fly';
+    clone.style.left=r.left+'px';clone.style.top=r.top+'px';
+    clone.style.width=r.width+'px';clone.style.height=r.height+'px';
+    document.body.appendChild(clone);
+    card.style.visibility='hidden';
+    const dx=tx-(r.left+r.width/2), dy=ty-(r.top+r.height/2);
+    setTimeout(()=>{
+      clone.style.transform='translate('+dx+'px,'+dy+'px) scale(.12) rotate('+((i-1.5)*50)+'deg)';
+      clone.style.opacity='0';
+    },i*70);
+    setTimeout(()=>clone.remove(),620+i*70);
+  });
+  if(any) SND('whoosh');
 }
 function updateHeapArrow(){
   if(G.lastTrickW<0)return;

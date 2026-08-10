@@ -747,6 +747,7 @@ html,body{background:#0a0a0a;}
 <div id="botbar">
   <div id="infomsg">Welcome to Dehla Pakad</div>
   <span id="diffbadge" onclick="cycleDiff()" title="Change difficulty">⚡ Medium</span>
+  <button class="btn" id="homebtn" onclick="goHome()" title="Back to main menu">🏠 Home</button>
   <button class="btn" id="fsbtn" onclick="toggleFullscreen()" title="Toggle fullscreen">⛶</button>
   <button class="btn" id="histbtn" onclick="showHist()" style="display:none">History</button>
   <button class="btn" id="newgamebtn" onclick="newGame()">New Game</button>
@@ -2903,7 +2904,12 @@ function leaveRoom(){
   if(NET.hbTimer){clearInterval(NET.hbTimer);NET.hbTimer=null;}
   location.href=location.pathname;
 }
-function confirmLeave(){
+function goHome(){
+  const mp=NET.mode==='host'||NET.mode==='client';
+  if(mp) confirmLeave();
+  else showMainMenu();
+}
+  function confirmLeave(){
   showModal('Leave Game?','<div style="font-size:12px;color:rgba(255,255,255,.6)">Your seat will be handed to AI so the game can continue without you.</div>',[{lbl:'Leave',fn:leaveRoom},{lbl:'Cancel',fn:closeModal}]);
 }
 /* ── options menu (\u22EE, top-right of the room bar) ──

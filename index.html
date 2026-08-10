@@ -106,7 +106,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:
    perfectly still instead of shifting left/right as text changes. */
 .nmrow{display:flex;align-items:center;justify-content:center;gap:3px;flex-shrink:0;}
 .nmrow.side{width:auto;flex-direction:column;}
-.nmrow.mid{width:190px;}
+.nmrow.mid{width:190px;position:relative;}
 .pname{
   font-family:'Cinzel',serif;font-size:12px;letter-spacing:1px;
   color:var(--gd);padding:3px 10px;border-radius:20px;
@@ -143,6 +143,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a;font-family:
   animation:trophyGlow 1.3s ease-in-out infinite;
 }
 .trophybadge.show{display:inline-block;}
+.nmrow.mid .trophybadge{position:absolute;right:2px;top:0;bottom:0;margin:auto 0;height:15px;}
 .nmrow.side .trophybadge{writing-mode:horizontal-tb;}
 @keyframes trophyGlow{
   0%,100%{transform:scale(1);filter:drop-shadow(0 0 4px rgba(255,215,80,.8)) drop-shadow(0 0 8px rgba(255,190,40,.5));}

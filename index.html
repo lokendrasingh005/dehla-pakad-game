@@ -677,10 +677,10 @@ body.has-roombar #wrap{top:38px;}
   border:1px solid var(--gold);border-radius:20px;padding:6px 14px;
   box-shadow:0 4px 18px rgba(0,0,0,.55),0 0 14px rgba(240,192,64,.35),inset 0 1px 0 rgba(255,220,140,.15);
   text-shadow:0 0 8px rgba(240,192,64,.5);white-space:nowrap;}
-.react-bubble.react-up{animation:reactUp 1.5s ease-out forwards;}
-.react-bubble.react-left{animation:reactLeft 1.5s ease-out forwards;}
-.react-bubble.react-right{animation:reactRight 1.5s ease-out forwards;}
-.react-bubble.react-in{animation:reactIn 1.5s ease-out forwards;}
+.react-bubble.react-up{animation:reactUp 3s ease-out forwards;}
+.react-bubble.react-left{animation:reactLeft 3s ease-out forwards;}
+.react-bubble.react-right{animation:reactRight 3s ease-out forwards;}
+.react-bubble.react-in{animation:reactIn 3s ease-out forwards;}
 @keyframes reactUp{0%{opacity:0;transform:translate(-50%,-20%) scale(.5);}15%{opacity:1;transform:translate(-50%,-60%) scale(1.08);}30%{transform:translate(-50%,-70%) scale(1);}100%{opacity:0;transform:translate(-50%,-220%) scale(1.1);}}
 @keyframes reactLeft{0%{opacity:0;transform:translate(-20%,-50%) scale(.5);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}30%{transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-220%,-50%) scale(1.1);}}
 @keyframes reactRight{0%{opacity:0;transform:translate(-80%,-50%) scale(.5);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}30%{transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(120%,-50%) scale(1.1);}}
@@ -2872,16 +2872,17 @@ function handleReaction(canonicalSeat,text){
   if(NET.mode==='host') NET.broadcast({type:'reaction',seat:canonicalSeat,txt:text});
 }
 function showReactionBubble(seat,text){
-  const nameEl=document.getElementById('nm'+seat);
-  if(!nameEl) return;
-  const r=nameEl.getBoundingClientRect();
+  const originId=seat===2?'top-cards':seat===1?'left-cards':seat===3?'right-cards':'arc';
+  const originEl=document.getElementById(originId);
+  if(!originEl) return;
+  const r=originEl.getBoundingClientRect();
   const b=document.createElement('div');
-  b.className='react-bubble '+(seat===2?'react-in':seat===1?'react-left':seat===3?'react-right':'react-up');
+  b.className='react-bubble '+(seat===2?'react-in':'react-up');
   b.textContent=text;
   b.style.left=(r.left+r.width/2)+'px';
-  b.style.top=r.top+'px';
+  b.style.top=(seat===2?r.bottom:r.top)+'px';
   document.body.appendChild(b);
-  setTimeout(()=>b.remove(),1500);
+  setTimeout(()=>b.remove(),3000);
 }
 function showModal(title,body,btns,big){
   atHome=false;

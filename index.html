@@ -565,7 +565,7 @@ body.has-roombar #wrap{top:38px;}
   margin:8px 0;text-align:center;letter-spacing:1px;
 }
 .mp-input::placeholder{color:rgba(255,255,255,.35);}
-.mp-label{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.5px;text-align:left;margin-top:10px;}
+.mp-label{font-size:11px;color:var(--gd);letter-spacing:1px;text-align:left;margin-top:10px;font-family:'Cinzel',serif;text-transform:uppercase;}
 .mp-players{margin:12px 0;text-align:left;font-size:14px;color:rgba(255,255,255,.8);line-height:2.1;}
 .mp-players .seat-tag{display:inline-block;min-width:88px;color:var(--gd);font-family:'Cinzel',serif;font-size:11px;}
 .mp-players .bot{color:rgba(255,255,255,.35);font-style:italic;}
@@ -610,7 +610,8 @@ body.has-roombar #wrap{top:38px;}
   box-shadow:0 0 0 2px rgba(201,149,42,.25),0 0 14px rgba(201,149,42,.5);
   transform:scale(1.08);
 }
-.profile-hint{font-size:12.5px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:4px;}
+.profile-hint{font-size:12.5px;color:rgba(240,208,140,.62);line-height:1.6;margin-bottom:4px;font-style:italic;}
+.menu-desc{font-size:13.5px;color:rgba(240,208,140,.65);line-height:1.6;margin-bottom:6px;font-style:italic;}
 
 .menu-profile-chip{
   display:inline-flex;align-items:center;gap:8px;
@@ -645,7 +646,7 @@ body.has-roombar #wrap{top:38px;}
 }
 .menu-tile:active{transform:scale(.95);background:rgba(201,149,42,.08);}
 .menu-tile .mt-icon{font-size:19px;}
-.menu-tile .mt-lbl{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.6);text-transform:uppercase;}
+.menu-tile .mt-lbl{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--gl);text-transform:uppercase;text-shadow:0 0 6px rgba(201,149,42,.3);}
 
 .stats-head{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;}
 .stats-head .sh-av{
@@ -659,7 +660,8 @@ body.has-roombar #wrap{top:38px;}
   padding:14px 8px;text-align:center;
 }
 .stat-card .sc-num{font-family:'Cinzel',serif;font-size:24px;color:var(--gl);line-height:1;text-shadow:0 0 10px rgba(201,149,42,.35);}
-.stat-card .sc-lbl{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:5px;letter-spacing:.3px;}
+.stat-card .sc-lbl{font-size:10.5px;color:rgba(240,208,140,.55);margin-top:5px;letter-spacing:.3px;font-family:'Cinzel',serif;}
+.stats-note{font-size:10px;color:rgba(240,208,140,.4);text-align:center;margin-top:12px;font-style:italic;}
 .stats-note{font-size:10px;color:rgba(255,255,255,.32);text-align:center;margin-top:12px;}
 .stats-reset{display:block;text-align:center;font-size:11px;color:rgba(255,120,110,.65);margin-top:8px;cursor:pointer;text-decoration:underline;}
 
@@ -3134,7 +3136,15 @@ function leaveRoom(){
   clearSavedSession();
   try{if(NET.peer)NET.peer.destroy();}catch(e){}
   if(NET.hbTimer){clearInterval(NET.hbTimer);NET.hbTimer=null;}
-  location.href=location.pathname;
+  if(NET.turnTimer){clearTimeout(NET.turnTimer);NET.turnTimer=null;}
+  document.getElementById('roombar').classList.remove('show');
+  document.body.classList.remove('has-roombar');
+  NET.mode='offline';NET.peer=null;NET.mySeat=0;NET.conns={};NET.hostConn=null;
+  NET.names=['','','',''];NET.myName='';NET.humanSeats=new Set();NET.roomCode=null;
+  NET.inLobby=false;NET.aiControlled=new Set();NET.migrationOffset=0;
+  AICTRL=new Set();
+  closeModal();
+  showMainMenu();
 }
 function goHome(){
   const mp=NET.mode==='host'||NET.mode==='client';
@@ -3945,7 +3955,7 @@ function showProfileSetup(onDone){
     '<input class="mp-input" id="profileNameInput" maxlength="16" placeholder="e.g. Priya" value="'+nameVal.replace(/"/g,'&quot;')+'">'+
     '<div class="mp-label" style="margin-top:12px;">Choose avatar</div>'+
     '<div id="profileAvatarGrid">'+profileAvatarGridHtml(_profileSelAvatar)+'</div>',
-    [{lbl:'Enter Table',fn:()=>{
+    [{lbl:existing?'Save':'Enter Table',fn:()=>{
       const nm=(document.getElementById('profileNameInput').value||'').trim();
       if(!nm){fmsg('Enter your name to continue');return;}
       saveProfile({name:nm,avatar:_profileSelAvatar});
@@ -3969,8 +3979,9 @@ function showStatsScreen(){
     '<div class="stats-note">Stats are saved on this device only.</div>'+
     '<div class="stats-reset" onclick="confirmResetStats()">Reset stats</div>';
   showModal('\uD83C\uDFC6 Your Stats',body,[
+    showModal('🏆 Your Stats',body,[
     {lbl:'Edit Profile',fn:()=>{closeModal();showProfileSetup(showStatsScreen);}},
-    {lbl:'Close',fn:closeModal}
+    {lbl:'Close',fn:showMainMenu}
   ],true);
 }
 function confirmResetStats(){
@@ -3982,11 +3993,11 @@ function showMainMenu(){
   const p=getProfile();
   showModal('<img src="icon-512.png" style="width:28px;height:28px;vertical-align:-6px;border-radius:6px;margin-right:6px;"> Dehla Coat',
     (p?('<div class="menu-profile-chip" onclick="showProfileSetup(showMainMenu)"><span class="mpc-av">'+p.avatar+'</span><span class="mpc-name">'+p.name+'</span><span class="mpc-edit">\u270E</span></div>'):'')+
-    '<div style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:4px;">Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>'+
+    '<div class="menu-desc">⚔️ Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>'+
     '<button class="menu-primary-btn" onclick="closeModal();showDifficultyModal(newGame);">Play vs AI</button>'+
     '<button class="menu-primary-btn" onclick="closeModal();showMultiplayerMenu();">Multiplayer</button>'+
     '<div class="menu-tiles">'+
-      '<div class="menu-tile" onclick="showFullRulebook();"><span class="mt-icon">\uD83D\uDCD6</span><span class="mt-lbl">How to Play</span></div>'+
+      '<div class="menu-tile" onclick="showFullRulebook(showMainMenu);"><span class="mt-icon">📖</span><span class="mt-lbl">How to Play</span></div>'+
       '<div class="menu-tile" onclick="showStatsScreen();"><span class="mt-icon">\uD83C\uDFC6</span><span class="mt-lbl">Your Stats</span></div>'+
     '</div>',
     [],true);
@@ -3994,7 +4005,7 @@ function showMainMenu(){
 }
 function showMultiplayerMenu(){
   showModal('\uD83D\uDC65 Multiplayer',
-    '<div style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:6px;">Create a room and share the room code, or join a friend\'s room using their code.</div>',
+    '<div class="menu-desc">👥 Create a room and share the room code, or join a friend\'s room using their code.</div>',
     [
       {lbl:'Create Room',fn:()=>{closeModal();showCreateRoomModal();}},
       {lbl:'Join Room',fn:()=>{closeModal();showJoinRoomModal('');}},

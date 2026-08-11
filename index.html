@@ -988,7 +988,12 @@ function updateRoomCoatUI(counts){
   // same convention the rest of the table UI already uses.
   const mySeat=(NET.mode==='client'&&NET.mySeat!=null)?NET.mySeat:0;
   const mine=rotTeamArr(mySeat,counts);
-  el.innerHTML='<span class="coatpill"><span class="cp-crown">\uD83D\uDC51</span><span class="cp-a">A '+mine[0]+'</span><span class="cp-b">B '+mine[1]+'</span></span>';
+  el.innerHTML='<span class="coatpill" onclick="showCoatInfo()"><span class="cp-crown">\uD83D\uDC51</span><span class="cp-a">A '+mine[0]+'</span><span class="cp-b">B '+mine[1]+'</span></span>';
+}
+  function showCoatInfo(){
+  showModal('\uD83D\uDC51 Coats This Room',
+    '<div style="font-size:13px;color:rgba(255,255,255,.75);line-height:1.7;text-align:left;">This counter tracks how many games with <b>Coats</b> each team has won in this room so far \u2014 It resets only when the room closes.</div>',
+    [{lbl:'Got it',fn:closeModal}]);
 }
 
 /* ── Cross-game starter rotation (item 14) ──
@@ -1448,7 +1453,8 @@ function clearHeaps(){
   document.getElementById('htmcnt').textContent='0 tricks';
   ['htens-us','htens-tm'].forEach(id=>{document.getElementById(id).innerHTML='';});
 }
-function collectHeapVisual(team,n,seat){
+function collectHeapVisual(team,n,seat,_fromNet){
+  if(!_fromNet&&typeof NET!=='undefined'&&NET.mode==='host') NET.broadcast({type:'heapVisual',team,n,seat});
   const cnt=document.getElementById(team===0?'huscnt':'htmcnt');
   cnt.textContent=G.hCounts[team]+' tricks';
   cnt.classList.add('pop');setTimeout(()=>cnt.classList.remove('pop'),400);
@@ -3720,6 +3726,7 @@ function handleClientMessage(data){
   }
   if(data.type==='state'){ applyRemoteState(data.payload,data.names,data.aiSeats); if(data.roomCoat) updateRoomCoatUI(data.roomCoat); return; }
   if(data.type==='sound'){ playSndByName(data.name); return; }
+  if(data.type==='heapVisual'){ collectHeapVisual(data.team,data.n,data.seat,true); return; }
   if(data.type==='turnTimer'){
     const localSeat=rotSeat(NET.mySeat,data.seat);
     TURNCD={seat:localSeat,endsAt:data.endsAt};

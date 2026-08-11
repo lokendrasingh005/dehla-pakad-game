@@ -3772,14 +3772,37 @@ function updateRoombarPlayers(players){
 /* ══════════════════════════════════════
    MENUS / INIT
 ══════════════════════════════════════ */
+const RULEBOOK_ONELINERS=[
+  'Objective: collect the most 10s (Dehlas) to win.',
+  'Coat: capture all four 10s \u2014 total defeat for the other team.',
+  'Tie (2\u20132 on tens): most tricks won decides the winner.',
+  'First 5 cards dealt. Follow suit \u2014 trump opens when void.',
+  'A 10 must land in a trick before any cards can be collected.',
+  'You must win two consecutive tricks to collect the heap.',
+  'Break the streak (lose the very next trick) \u2014 the heap stays uncollected.',
+  'A fresh 10 dropped mid-streak restarts the count \u2014 one more consecutive win is needed.',
+  'Weak hand: if all your cards are below 10 after the 5-card phase, the hand is dismissed and redealt.'
+];
+function rulebookBody(){
+  return '<div style="text-align:left;font-size:13px;color:rgba(255,255,255,.8);line-height:1.85;">'+
+    RULEBOOK_ONELINERS.map(function(r){return '\u2705 '+r;}).join('<br>')+
+    '</div>';
+}
+function showFullRulebook(onClose){
+  showModal('\uD83D\uDCD6 Dehla Coat \u2014 Rule Book',rulebookBody(),
+    [{lbl:'Close',fn:function(){closeModal();if(onClose)onClose();}}]);
+}
+let _diffModalOnStart=null;
+function reopenDifficultyModal(){ showDifficultyModal(_diffModalOnStart); }
 function showDifficultyModal(onStart){
+  _diffModalOnStart=onStart;
   showModal('<img src="icon-512.png" style="width:28px;height:28px;vertical-align:-6px;border-radius:6px;margin-right:6px;"> Dehla Coat',
   '<b>Teams:</b> Team A (you &amp; partner, across) &nbsp;vs&nbsp; Team B<br><br>'+
-  '\u2705 5 cards dealt first<br>'+
-  '\u2705 Follow suit \u2014 trump opens when void<br>'+
-  '\u2705 Same <b>person</b> wins 2 consecutive = collect heap<br>'+
+  '\u2705 First 5 cards dealt. Follow suit \u2014 trump opens when void<br>'+
+  '\u2705 Win 2 consecutive tricks to collect heap<br>'+
   '\u2705 First 10 in heap resets it once<br>'+
-  '\u2705 All 4 tens = Coat \uD83D\uDC51<br><br>'+
+  '\u2705 All 4 tens = Coat \uD83D\uDC51<br>'+
+  '<div style="text-align:right;margin-top:4px;"><span onclick="showFullRulebook(reopenDifficultyModal)" style="color:var(--gl);font-size:11px;text-decoration:underline;cursor:pointer;">More \u2192</span></div><br>'+
   '<div style="margin:10px 0;font-family:Cinzel,serif;font-size:11px;color:var(--gd);">SELECT DIFFICULTY:</div>'+
   '<div style="display:flex;gap:8px;justify-content:center;margin-bottom:8px;">'+
   '<button id="diffbtn1" class="diffopt easy'+(DIFFICULTY===1?' sel':'')+'" onclick="setDiff(1)">🟢 Easy</button>'+

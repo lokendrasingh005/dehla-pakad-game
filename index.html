@@ -2847,6 +2847,7 @@ function fmsg(txt,top=35,_fromNet){
 }
 let atHome=false; // tracks whether the main menu is the active screen (for the Android back button)
 let _reactTab='phrases';
+let _reactMenuOpen=false;
 const REACT_PHRASES=['Nice move!','Well played!','Good game!','Awesome! 🎉','Oops! 😅','Hurry up! ⏳','Unlucky!','Let\'s go!'];
 const REACT_EMOJIS=['👏','😂','🔥','😮','👍','😢','🤔','💪','🎉','😅','🙌','😱'];
 function reactionsMenuBody(){
@@ -2863,6 +2864,7 @@ function reactionsMenuBody(){
 }
 function switchReactTab(tab){ _reactTab=tab; document.getElementById('mbody').innerHTML=reactionsMenuBody(); }
 function showReactionsMenu(){
+  _reactMenuOpen=true;
   showModal('💬 Quick Reactions',reactionsMenuBody(),[{lbl:'Close',fn:closeModal}]);
 }
 function sendReaction(text){
@@ -2897,7 +2899,7 @@ function showModal(title,body,btns,big){
   document.getElementById('mbox').classList.toggle('mbox-lg',!!big);
   document.getElementById('modal').classList.add('open');
 }
-function closeModal(){document.getElementById('modal').classList.remove('open');}
+function closeModal(){_reactMenuOpen=false;document.getElementById('modal').classList.remove('open');}
 
 /* ══════════════════════════════════════
    MULTIPLAYER (peer-to-peer rooms, PeerJS)
@@ -3598,7 +3600,7 @@ function applyRemoteState(payload,names,aiSeats){
   AICTRL=new Set((aiSeats||[]).map(s=>rotSeat(mySeat,s)));
   const rot=s=>rotSeat(mySeat,s);
   const prevSel=(G&&typeof G.sel==='number')?G.sel:-1;
-  closeModal(); // dismiss any lobby/waiting modal now that real game state has arrived
+  if(!_reactMenuOpen) closeModal(); // dismiss any lobby/waiting modal now that real game state has arrived — but don't yank the reactions picker out from under someone
   G={
     ...payload,
     hands:rotArr4(mySeat,payload.hands),

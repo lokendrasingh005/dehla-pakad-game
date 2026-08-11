@@ -3792,7 +3792,6 @@ function showFullRulebook(onClose){
   showModal('\uD83D\uDCD6 Dehla Coat \u2014 Rule Book',rulebookBody(),
     [{lbl:'Close',fn:function(){closeModal();if(onClose)onClose();}}]);
 }
-let _diffModalOnStart=null;
 let _diffModalOnBack=null;
 function reopenDifficultyModal(){ showDifficultyModal(_diffModalOnStart,_diffModalOnBack); }
 function showDifficultyModal(onStart,onBack){

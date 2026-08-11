@@ -3280,7 +3280,7 @@ function setupNetworkResilience(){
 function clientReconnect(){
   if(NET.mode!=='client'||!NET.roomCode||NET.mySeat==null) return;
   if(NET.reconnecting) return;
-  NET.reconnecting=true;NET.reconnTries=0;
+  NET.reconnecting=true;NET.reconnTries=0;NET.reconnStartTime=Date.now();
   setNetStatus('🔄 Reconnecting…','reconnecting');
   attemptClientReconnect();
 }
@@ -3317,7 +3317,7 @@ async function attemptClientReconnect(){
    up with the 120s per-turn grace the host gives before an AI steps in. */
 function scheduleClientRetry(){
   if(!NET.reconnecting) return;
-  if(NET.reconnTries>=40){
+  if(Date.now()-NET.reconnStartTime>=60000){
     NET.reconnecting=false;
     setNetStatus('',null);
     const canTakeover=!!G;
@@ -3628,7 +3628,7 @@ async function hostRoom(name){
   const iceConfig=await getIceConfig();
   const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:iceConfig});
   NET.peer=peer;
-  peer.on('open',()=>{ showRoomLobby(); });
+  peer.on('open',()=>{ if(!G||G.gameOver) showRoomLobby(); });
   peer.on('connection',conn=>{
     conn.on('open',()=>{ conn.send({type:'seats',seats:seatSnapshot()}); });
     conn.on('data',data=>handleHostMessage(conn,data));

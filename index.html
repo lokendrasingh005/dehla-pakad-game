@@ -597,7 +597,7 @@ body.has-roombar #wrap{top:38px;}
   background:radial-gradient(circle at 50% 35%,rgba(240,192,64,.18),rgba(0,0,0,.3) 70%);
   border:2px solid var(--gold);box-shadow:0 0 0 4px rgba(201,149,42,.12),0 0 26px rgba(201,149,42,.45);
 }
-.profile-avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 4px;}
+.profile-avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 4px;max-height:190px;overflow-y:auto;padding-right:2px;}
 .profile-avatar-btn{
   font-size:22px;aspect-ratio:1;width:100%;border-radius:12px;
   border:1.5px solid rgba(201,149,42,.25);background:rgba(255,255,255,.03);
@@ -664,6 +664,27 @@ body.has-roombar #wrap{top:38px;}
 .stats-note{font-size:10px;color:rgba(240,208,140,.4);text-align:center;margin-top:12px;font-style:italic;}
 .stats-note{font-size:10px;color:rgba(255,255,255,.32);text-align:center;margin-top:12px;}
 .stats-reset{display:block;text-align:center;font-size:11px;color:rgba(255,120,110,.65);margin-top:8px;cursor:pointer;text-decoration:underline;}
+.react-tabs{display:flex;gap:6px;margin-bottom:10px;}
+.react-tab-btn{flex:1;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.5px;color:rgba(255,255,255,.5);background:rgba(255,255,255,.03);border:1px solid rgba(201,149,42,.22);border-radius:8px;padding:8px 4px;cursor:pointer;}
+.react-tab-btn.sel{color:var(--gl);border-color:var(--gold);background:rgba(201,149,42,.15);}
+.react-emoji-btn{font-size:22px;background:rgba(255,255,255,.05);border:1px solid rgba(201,149,42,.3);border-radius:10px;padding:6px 10px;cursor:pointer;}
+.react-emoji-btn:active{transform:scale(.9);background:rgba(201,149,42,.15);}
+.react-phrase-btn{display:block;width:100%;box-sizing:border-box;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px;color:var(--gl);background:rgba(255,255,255,.04);border:1px solid rgba(201,149,42,.25);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer;text-align:left;}
+.react-phrase-btn:active{transform:scale(.97);background:rgba(201,149,42,.12);}
+.react-bubble{position:fixed;transform:translate(-50%,-50%);z-index:400;pointer-events:none;
+  font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#fff8e8;
+  background:linear-gradient(135deg,rgba(40,20,5,.92),rgba(20,8,2,.92));
+  border:1px solid var(--gold);border-radius:20px;padding:6px 14px;
+  box-shadow:0 4px 18px rgba(0,0,0,.55),0 0 14px rgba(240,192,64,.35),inset 0 1px 0 rgba(255,220,140,.15);
+  text-shadow:0 0 8px rgba(240,192,64,.5);white-space:nowrap;}
+.react-bubble.react-up{animation:reactUp 1.5s ease-out forwards;}
+.react-bubble.react-left{animation:reactLeft 1.5s ease-out forwards;}
+.react-bubble.react-right{animation:reactRight 1.5s ease-out forwards;}
+.react-bubble.react-in{animation:reactIn 1.5s ease-out forwards;}
+@keyframes reactUp{0%{opacity:0;transform:translate(-50%,-20%) scale(.5);}15%{opacity:1;transform:translate(-50%,-60%) scale(1.08);}30%{transform:translate(-50%,-70%) scale(1);}100%{opacity:0;transform:translate(-50%,-220%) scale(1.1);}}
+@keyframes reactLeft{0%{opacity:0;transform:translate(-20%,-50%) scale(.5);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}30%{transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-220%,-50%) scale(1.1);}}
+@keyframes reactRight{0%{opacity:0;transform:translate(-80%,-50%) scale(.5);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}30%{transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(120%,-50%) scale(1.1);}}
+@keyframes reactIn{0%{opacity:0;transform:translate(-50%,-20%) scale(.5);}15%{opacity:1;transform:translate(-50%,-50%) scale(1.08);}30%{transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,140%) scale(.85);}}
 
 /* ═══ RESPONSIVE SCALE STAGE ═══
    The whole game is designed at a fixed reference size and then
@@ -873,6 +894,7 @@ html,body{background:#0a0a0a;}
   <span id="diffbadge" onclick="cycleDiff()" title="Change difficulty">⚡ Medium</span>
   <button class="btn" id="homebtn" onclick="goHome()" title="Back to main menu">🏠 Home</button>
   <button class="btn" id="mutebtn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+  <button class="btn" id="reactbtn" onclick="showReactionsMenu()" title="Send a reaction">💬</button>
   <button class="btn" id="histbtn" onclick="showHist()" style="display:none">History</button>
   </div>
 
@@ -1061,9 +1083,7 @@ function updateRoomCoatUI(counts){
   if(!el) return;
   // Rotate into this viewer's own Team-A(=mine)/Team-B(=theirs) framing,
   // same convention the rest of the table UI already uses.
-  const mySeat=(NET.mode==='client'&&NET.mySeat!=null)?NET.mySeat:0;
-  const mine=rotTeamArr(mySeat,counts);
-  el.innerHTML='<span class="coatpill" onclick="showCoatInfo()"><span class="cp-crown">\uD83D\uDC51</span><span class="cp-a">A '+mine[0]+'</span><span class="cp-b">B '+mine[1]+'</span></span>';
+  el.innerHTML='<span class="coatpill" onclick="showCoatInfo()"><span class="cp-crown">👑</span><span class="cp-a">A '+counts[0]+'</span><span class="cp-b">B '+counts[1]+'</span></span>';
 }
   function showCoatInfo(){
   showModal('\uD83D\uDC51 Coats This Room',
@@ -2822,6 +2842,47 @@ function fmsg(txt,top=35,_fromNet){
   if(!_fromNet&&typeof NET!=='undefined'&&NET.mode==='host') NET.broadcast({type:'fmsg',txt,top});
 }
 let atHome=false; // tracks whether the main menu is the active screen (for the Android back button)
+let _reactTab='phrases';
+const REACT_PHRASES=['Nice move!','Well played!','Good game!','Awesome! 🎉','Oops! 😅','Hurry up! ⏳','Unlucky!','Let\'s go!'];
+const REACT_EMOJIS=['👏','😂','🔥','😮','👍','😢','🤔','💪','🎉','😅','🙌','😱'];
+function reactionsMenuBody(){
+  const tabs='<div class="react-tabs">'+
+    '<button type="button" class="react-tab-btn'+(_reactTab==='phrases'?' sel':'')+'" onclick="switchReactTab(\'phrases\')">💬 Phrases</button>'+
+    '<button type="button" class="react-tab-btn'+(_reactTab==='emojis'?' sel':'')+'" onclick="switchReactTab(\'emojis\')">😀 Emojis</button>'+
+  '</div>';
+  const content=_reactTab==='phrases'
+    ?REACT_PHRASES.map(p=>'<button type="button" class="react-phrase-btn" onclick="sendReaction(\''+p.replace(/'/g,"\\'")+'\')">'+p+'</button>').join('')
+    :'<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;">'+
+      REACT_EMOJIS.map(e=>'<button type="button" class="react-emoji-btn" onclick="sendReaction(\''+e+'\')">'+e+'</button>').join('')+
+    '</div>';
+  return tabs+content;
+}
+function switchReactTab(tab){ _reactTab=tab; document.getElementById('mbody').innerHTML=reactionsMenuBody(); }
+function showReactionsMenu(){
+  showModal('💬 Quick Reactions',reactionsMenuBody(),[{lbl:'Close',fn:closeModal}]);
+}
+function sendReaction(text){
+  closeModal();
+  if(NET.mode==='client'){ NET.send({type:'reaction',txt:text}); }
+  else { handleReaction(0,text); }
+}
+function handleReaction(canonicalSeat,text){
+  const localSeat=(NET.mode==='client')?rotSeat(NET.mySeat,canonicalSeat):canonicalSeat;
+  showReactionBubble(localSeat,text);
+  if(NET.mode==='host') NET.broadcast({type:'reaction',seat:canonicalSeat,txt:text});
+}
+function showReactionBubble(seat,text){
+  const nameEl=document.getElementById('nm'+seat);
+  if(!nameEl) return;
+  const r=nameEl.getBoundingClientRect();
+  const b=document.createElement('div');
+  b.className='react-bubble '+(seat===2?'react-in':seat===1?'react-left':seat===3?'react-right':'react-up');
+  b.textContent=text;
+  b.style.left=(r.left+r.width/2)+'px';
+  b.style.top=r.top+'px';
+  document.body.appendChild(b);
+  setTimeout(()=>b.remove(),1500);
+}
 function showModal(title,body,btns,big){
   atHome=false;
   document.getElementById('mtitle').innerHTML=title;
@@ -3149,7 +3210,10 @@ function leaveRoom(){
 function goHome(){
   const mp=NET.mode==='host'||NET.mode==='client';
   if(mp) confirmLeave();
-  else showMainMenu();
+  else confirmLeaveSolo();
+}
+function confirmLeaveSolo(){
+  showModal('Leave Game?','<div style="font-size:12px;color:rgba(255,255,255,.6)">Your current hand will be lost.</div>',[{lbl:'Leave',fn:()=>{closeModal();showMainMenu();}},{lbl:'Cancel',fn:closeModal}]);
 }
   function confirmLeave(){
   showModal('Leave Game?','<div style="font-size:12px;color:rgba(255,255,255,.6)">Your seat will be handed to AI so the game can continue without you.</div>',[{lbl:'Leave',fn:leaveRoom},{lbl:'Cancel',fn:closeModal}]);
@@ -3672,6 +3736,7 @@ function handleHostMessage(conn,data){
     return;
   }
   if(data.type==='leaving'){ onSeatLeavePermanently(seat); return; }
+  if(data.type==='reaction'){ handleReaction(toCanonical(seat),data.txt); return; }
   if(data.type==='reqNewGame'){ return; } // new-game is host-only now — ignore a stray client request
   if(data.type==='handover'){ hostSetAIControl(seat,true); return; }
   if(data.type==='reclaim'){ hostSetAIControl(seat,false); return; }
@@ -3812,7 +3877,13 @@ function handleClientMessage(data){
   }
   if(data.type==='state'){ applyRemoteState(data.payload,data.names,data.aiSeats); if(data.roomCoat) updateRoomCoatUI(data.roomCoat); return; }
   if(data.type==='sound'){ playSndByName(data.name); return; }
-  if(data.type==='heapVisual'){ collectHeapVisual(data.team,data.n,data.seat,true); return; }
+  if(data.type==='heapVisual'){
+    const localSeat=rotSeat(NET.mySeat,data.seat);
+    const localTeam=data.team^(NET.mySeat%2);
+    collectHeapVisual(localTeam,data.n,localSeat,true);
+    return;
+  }
+  if(data.type==='reaction'){ handleReaction(data.seat,data.txt); return; }
   if(data.type==='turnTimer'){
     const localSeat=rotSeat(NET.mySeat,data.seat);
     TURNCD={seat:localSeat,endsAt:data.endsAt};
@@ -3908,7 +3979,10 @@ function showDifficultyModal(onStart,onBack){
 }
 const PROFILE_KEY='dc_profile';
 const STATS_KEY='dc_stats';
-const AVATAR_LIST=['🤴','👸','🧙','🥷','🦸','🧑‍💼','🦁','🐯','🐱','🦊','🐼','🐵','🐸','🦄','🎩'];
+const AVATAR_LIST=['🤴','👸','🧙','🥷','🦸','🧑‍💼','🦁','🐯','🐱','🦊','🐼','🐵','🐸','🦄','🎩',
+  '😎','🤠','🧑‍🎤','🧑‍🚀','🧑‍🎨','🧑‍🍳','🧑‍⚕️','🧑‍🌾','🧑‍🏫','🧑‍💻','🕵️','🧛','🧟','🧞','🧜‍♀️',
+  '🧚','🎅','🤵','👰','🐶','🐺','🦝','🐨','🐹','🐰','🦉','🦅','🐍','🐢','🐬',
+  '🐳','🐙','🦋','🐝','🌵','♠️','♥️','♦️','♣️','🃏'];
 function getProfile(){
   try{ const raw=localStorage.getItem(PROFILE_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; }
 }

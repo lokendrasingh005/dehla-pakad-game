@@ -590,6 +590,79 @@ body.has-roombar #wrap{top:38px;}
 #rb-status.connected{color:#7de07e;}
 @keyframes rbpulse{0%,100%{opacity:1;}50%{opacity:.35;}}
 
+/* ═══ PROFILE & STATS ═══ */
+.profile-avatar-circle{
+  width:84px;height:84px;border-radius:50%;margin:4px auto 18px;
+  display:flex;align-items:center;justify-content:center;font-size:40px;
+  background:radial-gradient(circle at 50% 35%,rgba(240,192,64,.18),rgba(0,0,0,.3) 70%);
+  border:2px solid var(--gold);box-shadow:0 0 0 4px rgba(201,149,42,.12),0 0 26px rgba(201,149,42,.45);
+}
+.profile-avatar-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0 4px;}
+.profile-avatar-btn{
+  font-size:22px;aspect-ratio:1;width:100%;border-radius:12px;
+  border:1.5px solid rgba(201,149,42,.25);background:rgba(255,255,255,.03);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;
+  transition:transform .12s,border-color .12s,background .12s,box-shadow .12s;
+}
+.profile-avatar-btn:active{transform:scale(.9);}
+.profile-avatar-btn.sel{
+  border-color:var(--gold);background:rgba(201,149,42,.18);
+  box-shadow:0 0 0 2px rgba(201,149,42,.25),0 0 14px rgba(201,149,42,.5);
+  transform:scale(1.08);
+}
+.profile-hint{font-size:12.5px;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:4px;}
+
+.menu-profile-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.05);border:1px solid rgba(201,149,42,.3);
+  border-radius:30px;padding:5px 14px 5px 6px;margin:0 auto 16px;cursor:pointer;
+  transition:background .15s,border-color .15s;
+}
+.menu-profile-chip:active{background:rgba(201,149,42,.14);transform:scale(.97);}
+.menu-profile-chip .mpc-av{
+  width:26px;height:26px;border-radius:50%;background:rgba(201,149,42,.15);
+  display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid rgba(201,149,42,.4);
+}
+.menu-profile-chip .mpc-name{font-family:'Cinzel',serif;font-size:13px;color:var(--gl);letter-spacing:.5px;}
+.menu-profile-chip .mpc-edit{font-size:10px;color:rgba(255,255,255,.35);margin-left:1px;}
+
+.menu-primary-btn{
+  display:block;width:100%;box-sizing:border-box;
+  background:linear-gradient(135deg,#c9952a 0%,#a07820 50%,#7a5c10 100%);
+  color:#1a0a00;border:none;border-radius:12px;padding:16px 18px;
+  font-family:'Cinzel',serif;font-size:16px;font-weight:700;letter-spacing:1.5px;
+  cursor:pointer;margin-top:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.5),0 1px 0 rgba(255,220,100,.2),inset 0 1px 0 rgba(255,220,100,.15);
+  transition:transform .1s,box-shadow .1s;
+}
+.menu-primary-btn:active{transform:scale(.97);box-shadow:0 1px 4px rgba(0,0,0,.5);}
+
+.menu-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px;}
+.menu-tile{
+  background:rgba(255,255,255,.03);border:1px solid rgba(201,149,42,.22);border-radius:12px;
+  padding:12px 6px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:transform .12s,border-color .12s,background .12s;
+}
+.menu-tile:active{transform:scale(.95);background:rgba(201,149,42,.08);}
+.menu-tile .mt-icon{font-size:19px;}
+.menu-tile .mt-lbl{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.6);text-transform:uppercase;}
+
+.stats-head{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;}
+.stats-head .sh-av{
+  width:40px;height:40px;border-radius:50%;background:rgba(201,149,42,.15);
+  border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.stats-head .sh-name{font-family:'Cinzel',serif;font-size:16px;color:var(--gl);letter-spacing:.5px;}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.stat-card{
+  background:rgba(255,255,255,.03);border:1px solid rgba(201,149,42,.22);border-radius:11px;
+  padding:14px 8px;text-align:center;
+}
+.stat-card .sc-num{font-family:'Cinzel',serif;font-size:24px;color:var(--gl);line-height:1;text-shadow:0 0 10px rgba(201,149,42,.35);}
+.stat-card .sc-lbl{font-size:10.5px;color:rgba(255,255,255,.5);margin-top:5px;letter-spacing:.3px;}
+.stats-note{font-size:10px;color:rgba(255,255,255,.32);text-align:center;margin-top:12px;}
+.stats-reset{display:block;text-align:center;font-size:11px;color:rgba(255,120,110,.65);margin-top:8px;cursor:pointer;text-decoration:underline;}
+
 /* ═══ RESPONSIVE SCALE STAGE ═══
    The whole game is designed at a fixed reference size and then
    scaled (and centered/letterboxed) to fit ANY device screen —
@@ -1406,6 +1479,9 @@ function endHand(){
     else if(tt>ut){iWon=false;SND('lose');}
     else{isDraw=true;SND('sweep');}
   }
+  // Local device stats — recorded here (host/offline only; endHand
+  // never runs on a client device) so "you" always maps to Team A.
+  recordGameResult(iWon===true,isCoat,isDraw);
   // ── Room coat history (item 13) — canonical team A/B counter that
   // persists for as long as this room stays open, purged when it closes.
   if(NET.mode==='host'&&isCoat){
@@ -2749,7 +2825,7 @@ function showModal(title,body,btns,big){
   document.getElementById('mtitle').innerHTML=title;
   document.getElementById('mbody').innerHTML=body;
   const bb=document.getElementById('mbtns');bb.innerHTML='';
-  for(const b of btns){const btn=document.createElement('button');btn.className='btn';btn.textContent=b.lbl;btn.onclick=b.fn;bb.appendChild(btn);}
+  for(const b of btns){const btn=document.createElement('button');btn.className='btn'+(b.cls?(' '+b.cls):'');btn.textContent=b.lbl;btn.onclick=b.fn;bb.appendChild(btn);}
   document.getElementById('mbox').classList.toggle('mbox-lg',!!big);
   document.getElementById('modal').classList.add('open');
 }
@@ -3751,7 +3827,7 @@ function showSeatPicker(seats){
   }).join('<div style="height:6px"></div>');
   showModal('Choose Your Seat',
     '<div class="mp-label">Your name</div>'+
-    '<input class="mp-input" id="mp-seat-name" maxlength="16" placeholder="e.g. Priya">'+
+    '<input class="mp-input" id="mp-seat-name" maxlength="16" placeholder="e.g. Priya" value="'+((getProfile()&&getProfile().name)||'').replace(/"/g,'&quot;')+'">'+
     '<div class="mp-label">Pick a seat</div>'+
     '<div style="display:flex;flex-direction:column;gap:6px;margin-top:6px;">'+rows+'</div>',
     [{lbl:'Cancel',fn:leaveRoom}]);
@@ -3820,13 +3896,100 @@ function showDifficultyModal(onStart,onBack){
   '</div>',
   [{lbl:'Back',fn:()=>{closeModal();_diffModalOnBack();}},{lbl:'Deal Cards',fn:onStart}]);
 }
+const PROFILE_KEY='dc_profile';
+const STATS_KEY='dc_stats';
+const AVATAR_LIST=['🤴','👸','🧙','🥷','🦸','🧑‍💼','🦁','🐯','🐱','🦊','🐼','🐵','🐸','🦄','🎩'];
+function getProfile(){
+  try{ const raw=localStorage.getItem(PROFILE_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; }
+}
+function saveProfile(p){ try{ localStorage.setItem(PROFILE_KEY,JSON.stringify(p)); }catch(e){} }
+function getStats(){
+  const d={played:0,wins:0,losses:0,coatsWon:0,coatsLost:0};
+  try{
+    const raw=localStorage.getItem(STATS_KEY);
+    return raw?Object.assign(d,JSON.parse(raw)):d;
+  }catch(e){ return d; }
+}
+function saveStats(s){ try{ localStorage.setItem(STATS_KEY,JSON.stringify(s)); }catch(e){} }
+function resetStats(){ saveStats({played:0,wins:0,losses:0,coatsWon:0,coatsLost:0}); }
+function recordGameResult(won,isCoat,isDraw){
+  const s=getStats();
+  s.played++;
+  if(!isDraw){
+    if(won)s.wins++; else s.losses++;
+    if(isCoat){ if(won)s.coatsWon++; else s.coatsLost++; }
+  }
+  saveStats(s);
+}
+let _profileSelAvatar=null;
+function profileAvatarGridHtml(sel){
+  return '<div class="profile-avatar-grid">'+
+    AVATAR_LIST.map(a=>'<button type="button" class="profile-avatar-btn'+(a===sel?' sel':'')+'" onclick="pickProfileAvatar(\''+a+'\')">'+a+'</button>').join('')+
+    '</div>';
+}
+function pickProfileAvatar(a){
+  _profileSelAvatar=a;
+  const grid=document.getElementById('profileAvatarGrid');
+  if(grid) grid.innerHTML=profileAvatarGridHtml(a);
+  const preview=document.getElementById('profileAvatarPreview');
+  if(preview) preview.textContent=a;
+}
+function showProfileSetup(onDone){
+  const existing=getProfile();
+  _profileSelAvatar=(existing&&existing.avatar)||AVATAR_LIST[0];
+  const nameVal=(existing&&existing.name)||'';
+  showModal('<img src="icon-512.png" style="width:28px;height:28px;vertical-align:-6px;border-radius:6px;margin-right:6px;"> '+(existing?'Edit Profile':'Welcome'),
+    '<div class="profile-hint">'+(existing?'Update how other players see you at the table.':'This is how other players will see you \u2014 saved on this device so you won\u2019t need to enter it again.')+'</div>'+
+    '<div id="profileAvatarPreview" class="profile-avatar-circle">'+_profileSelAvatar+'</div>'+
+    '<div class="mp-label">Your name</div>'+
+    '<input class="mp-input" id="profileNameInput" maxlength="16" placeholder="e.g. Priya" value="'+nameVal.replace(/"/g,'&quot;')+'">'+
+    '<div class="mp-label" style="margin-top:12px;">Choose avatar</div>'+
+    '<div id="profileAvatarGrid">'+profileAvatarGridHtml(_profileSelAvatar)+'</div>',
+    [{lbl:'Enter Table',fn:()=>{
+      const nm=(document.getElementById('profileNameInput').value||'').trim();
+      if(!nm){fmsg('Enter your name to continue');return;}
+      saveProfile({name:nm,avatar:_profileSelAvatar});
+      PNAME[0]=nm;
+      closeModal();
+      if(onDone)onDone();
+    }}],true);
+}
+function showStatsScreen(){
+  const p=getProfile()||{name:'Player',avatar:'🤴'};
+  const s=getStats();
+  const winRate=s.played?Math.round((s.wins/s.played)*100):0;
+  const card=(num,lbl)=>'<div class="stat-card"><div class="sc-num">'+num+'</div><div class="sc-lbl">'+lbl+'</div></div>';
+  const body=
+    '<div class="stats-head"><div class="sh-av">'+p.avatar+'</div><div class="sh-name">'+p.name+'</div></div>'+
+    '<div class="stats-grid">'+
+      card(s.played,'Games Played')+card(s.wins,'Wins')+
+      card(s.losses,'Losses')+card(winRate+'%','Win Rate')+
+      card('\uD83D\uDC51 '+s.coatsWon,'Coats Won')+card('\uD83D\uDC51 '+s.coatsLost,'Coats Lost')+
+    '</div>'+
+    '<div class="stats-note">Stats are saved on this device only.</div>'+
+    '<div class="stats-reset" onclick="confirmResetStats()">Reset stats</div>';
+  showModal('\uD83C\uDFC6 Your Stats',body,[
+    {lbl:'Edit Profile',fn:()=>{closeModal();showProfileSetup(showStatsScreen);}},
+    {lbl:'Close',fn:closeModal}
+  ],true);
+}
+function confirmResetStats(){
+  showModal('Reset Stats?',
+    '<div style="font-size:13px;color:rgba(255,255,255,.65);">This clears your games played, wins, losses and coat counts on this device. This can\u2019t be undone.</div>',
+    [{lbl:'Cancel',fn:showStatsScreen},{lbl:'Reset',fn:()=>{resetStats();showStatsScreen();}}]);
+}
 function showMainMenu(){
+  const p=getProfile();
   showModal('<img src="icon-512.png" style="width:28px;height:28px;vertical-align:-6px;border-radius:6px;margin-right:6px;"> Dehla Coat',
-    '<div style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:4px;">Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>',
-    [
-      {lbl:'Play vs AI',fn:()=>{closeModal();showDifficultyModal(newGame);}},
-      {lbl:'Multiplayer',fn:()=>{closeModal();showMultiplayerMenu();}},
-    ],true);
+    (p?('<div class="menu-profile-chip" onclick="showProfileSetup(showMainMenu)"><span class="mpc-av">'+p.avatar+'</span><span class="mpc-name">'+p.name+'</span><span class="mpc-edit">\u270E</span></div>'):'')+
+    '<div style="font-size:14px;color:rgba(255,255,255,.65);margin-bottom:4px;">Play solo against AI bots, or start a multiplayer room and share the room code with friends.</div>'+
+    '<button class="menu-primary-btn" onclick="closeModal();showDifficultyModal(newGame);">Play vs AI</button>'+
+    '<button class="menu-primary-btn" onclick="closeModal();showMultiplayerMenu();">Multiplayer</button>'+
+    '<div class="menu-tiles">'+
+      '<div class="menu-tile" onclick="showFullRulebook();"><span class="mt-icon">\uD83D\uDCD6</span><span class="mt-lbl">How to Play</span></div>'+
+      '<div class="menu-tile" onclick="showStatsScreen();"><span class="mt-icon">\uD83C\uDFC6</span><span class="mt-lbl">Your Stats</span></div>'+
+    '</div>',
+    [],true);
   atHome=true;
 }
 function showMultiplayerMenu(){
@@ -3841,7 +4004,7 @@ function showMultiplayerMenu(){
 function showCreateRoomModal(){
   showModal('Create Room',
     '<div class="mp-label">Your name</div>'+
-    '<input class="mp-input" id="mp-name-input" maxlength="16" placeholder="e.g. Rahul">',
+    '<input class="mp-input" id="mp-name-input" maxlength="16" placeholder="e.g. Rahul" value="'+((getProfile()&&getProfile().name)||'').replace(/"/g,'&quot;')+'">',
     [
       {lbl:'Create',fn:()=>{
         const v=(document.getElementById('mp-name-input').value||'').trim();
@@ -3873,9 +4036,13 @@ setTimeout(function(){
   const params=new URLSearchParams(location.search);
   const roomFromLink=roomCodeFromInput(params.get('room'));
   const saved=roomFromLink?null:loadSavedSession();
-  if(saved) showWelcomeBackModal(saved);
-  else if(roomFromLink) showJoinRoomModal(roomFromLink);
-  else showMainMenu();
+  function proceedAfterProfile(){
+    if(saved) showWelcomeBackModal(saved);
+    else if(roomFromLink) showJoinRoomModal(roomFromLink);
+    else showMainMenu();
+  }
+  if(!getProfile()) showProfileSetup(proceedAfterProfile);
+  else { PNAME[0]=getProfile().name; proceedAfterProfile(); }
 },3000);
   /* Android hardware Back button: go to main menu instead of exiting,
    double-back at the main menu actually exits. */

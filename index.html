@@ -1633,8 +1633,8 @@ function updateBufTens(){
    TRUMP UI
 ══════════════════════════════════════ */
 function updateTrumpUI(){
-  if(!G.trump)return;
   const b=document.getElementById('tbadge');
+  if(!G.trump){b.textContent='?';b.classList.remove('on');b.style.color='';document.getElementById('tlbl').textContent='No Trump';return;}
   b.textContent=G.trump;b.classList.add('on');
   b.style.color=RED.has(G.trump)?'#e74c3c':'#f0f0f0';
   document.getElementById('tlbl').textContent=SNAME[G.trump];
@@ -4172,6 +4172,7 @@ window.addEventListener('popstate', function(){
   }
 });
 </script>
-  
+  <script data-goatcounter="https://advikadehlacoat.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

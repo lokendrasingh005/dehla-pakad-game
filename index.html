@@ -2590,10 +2590,8 @@ function renderTrickSlots(){
     const sb=document.getElementById(SB_ID[p]);
     if(!sb)continue;
     if(present[p]){
-      if(!sb.querySelector('.card')){
-        sb.innerHTML='';sb.classList.add('hascard');
-        sb.appendChild(mkCard(present[p],'played cin'));
-      }
+      sb.innerHTML='';sb.classList.add('hascard');
+      sb.appendChild(mkCard(present[p],'played cin'));
     } else if(sb.classList.contains('hascard')||sb.querySelector('.card')){
       sb.innerHTML='';sb.classList.remove('hascard');
     }

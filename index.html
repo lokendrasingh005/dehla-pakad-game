@@ -1405,6 +1405,7 @@ function resolve(){
         fmsg(PNAME[W]+' wins (10 resets — one more to collect!)');SND('reset');
       } else {
         G.firstH=false;
+        if(hasTen&&isDeal8Trick) G.heapHasTen=true;
         fmsg(PNAME[W]+' wins — heap now '+G.heapN);
       }
       sweepTrickToBuffer();

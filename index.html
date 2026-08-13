@@ -1151,9 +1151,10 @@ function newGame(){
     G.first5[p].push({...c});
   }
   G.rem=[...d];
-  // Whoever the starter-rotation (item 14) says should lead this hand —
-  // canonical seat translated into this device's own local numbering.
   G.cur=toLocalSeat(STARTER_SEAT);
+  if(NET.mode==='host'){
+    for(let s=1;s<4;s++){ if(!NET.humanSeats.has(s)) NET.aiControlled.add(s); }
+  }
   sortAll();resetUI();DEALT_ANIM_PENDING=true;render();
   info('5 cards dealt — play until trump is opened!');
   maybeAI(1000);
@@ -3111,7 +3112,7 @@ function scheduleTurnTimeout(){
 /* Toggle AI control of a seat on/off (explicit handover / reclaim), for
    either a connected client's seat or the host's own seat 0. */
 function hostSetAIControl(seat,on){
-  if(on) NET.aiControlled.add(seat); else NET.aiControlled.delete(seat);
+  if(on) NET.aiControlled.add(seat); else NET.aiControlled.add(seat);
   renderNames();
   if(G) broadcastState();
   if(G&&!G.gameOver&&G.cur===seat){ clearTurnTimer(); maybeAI(on?400:0); }

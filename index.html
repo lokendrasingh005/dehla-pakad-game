@@ -3941,6 +3941,7 @@ function handleClientMessage(data){
     return;
   }
   if(data.type==='roomCoat'){ updateRoomCoatUI(data.counts); return; }
+  if(data.type==='showAd'){ triggerAdThenStart(()=>{}); return; }
   if(data.type==='fmsg'){ fmsg(data.txt,data.top,true); return; }
 }
 const SEAT_ROLE=['Player A1','Player B1 (Left)','Player A2 — Host\'s Partner','Player B2 (Right)'];

@@ -3668,19 +3668,58 @@ async function hostRoom(name){
   updateRoomCoatUI(ROOMCOAT);
   updateBotbarVisibility();
   showModal('🎴 Creating Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Setting up your room…</div>'+iceStatusLine(),[]);
-  const iceConfig=await getIceConfig();
-  const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:iceConfig});
+  // Guard against getIceConfig() itself hanging (seen after solo→multiplayer) —
+  // race it against a hard timeout and fall back to the public relay list.
+  let iceConfig;
+  try{
+    iceConfig=await Promise.race([
+      getIceConfig(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('ice-timeout')),6000))
+    ]);
+  }catch(e){
+    iceConfig={iceServers:FALLBACK_ICE_SERVERS};
+  }
+  attemptHostPeer(iceConfig,false);
+}
+function attemptHostPeer(iceConfig,forceRelay){
+  let settled=false;
+  const cfg=forceRelay?{iceServers:iceConfig.iceServers,iceTransportPolicy:'relay'}:iceConfig;
+  const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:cfg});
   NET.peer=peer;
-  peer.on('open',()=>{ if(!G||G.gameOver) showRoomLobby(); });
+  const timeout=setTimeout(()=>{
+    if(settled)return;
+    settled=true;
+    try{peer.destroy();}catch(e){}
+    if(!forceRelay){
+      showModal('🎴 Creating Room','<div style="font-size:12px;color:rgba(255,255,255,.6)">Still setting up… trying a relay route</div>'+iceStatusLine(),[]);
+      attemptHostPeer(iceConfig,true);
+    } else {
+      showModal('Could Not Create Room','<div class="mp-err">Room setup timed out — this can happen after switching modes. Please try again.</div>',[{lbl:'Try Again',fn:()=>{closeModal();hostRoom(NET.names[0]);}},{lbl:'Back to Menu',fn:()=>{closeModal();showMainMenu();}}]);
+    }
+  },12000);
+  peer.on('open',()=>{
+    if(settled)return;
+    settled=true;clearTimeout(timeout);
+    if(!G||G.gameOver) showRoomLobby();
+    startHeartbeat();
+  });
   peer.on('connection',conn=>{
     conn.on('open',()=>{ conn.send({type:'seats',seats:seatSnapshot()}); });
     conn.on('data',data=>handleHostMessage(conn,data));
     conn.on('close',()=>{ if(conn._seat!=null) onSeatDisconnect(conn._seat); });
     conn.on('error',()=>{ if(conn._seat!=null) onSeatDisconnect(conn._seat); });
   });
-  peer.on('error',err=>{ console.error(err); fmsg('Room error — please try again'); });
+  peer.on('error',err=>{
+    console.error(err);
+    if(settled){ fmsg('Room error — please try again'); return; }
+    settled=true;clearTimeout(timeout);
+    if(!forceRelay){
+      attemptHostPeer(iceConfig,true);
+    } else {
+      showModal('Could Not Create Room','<div class="mp-err">Something went wrong creating the room. Please try again.</div>',[{lbl:'Try Again',fn:()=>{closeModal();hostRoom(NET.names[0]);}},{lbl:'Back to Menu',fn:()=>{closeModal();showMainMenu();}}]);
+    }
+  });
   peer.on('disconnected',()=>{ try{peer.reconnect();}catch(e){} });
-  startHeartbeat();
 }
 /* ── heartbeat: catches seats that die silently ──
    A phone whose app gets force-closed, killed by the OS, or loses

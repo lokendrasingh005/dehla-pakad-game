@@ -10,6 +10,24 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+  <script>
+const APP_VERSION = 1;
+fetch('version.json?t=' + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    if (data.v !== APP_VERSION) {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(reg => reg.unregister());
+        });
+      }
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      }).finally(() => location.reload());
+    }
+  })
+  .catch(() => {});
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Dehla Coat</title>

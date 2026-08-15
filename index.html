@@ -3682,10 +3682,19 @@ async function hostRoom(name){
   attemptHostPeer(iceConfig,false);
 }
 function attemptHostPeer(iceConfig,forceRelay){
+  console.log('[attemptHostPeer] starting, forceRelay=',forceRelay);
   let settled=false;
   const cfg=forceRelay?{iceServers:iceConfig.iceServers,iceTransportPolicy:'relay'}:iceConfig;
-  const peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:cfg});
+  let peer;
+  try{
+    peer=new Peer('dehla-'+NET.roomCode,{debug:0,config:cfg});
+  }catch(err){
+    console.error('[attemptHostPeer] new Peer() threw synchronously:',err);
+    showModal('Could Not Create Room','<div class="mp-err">Something went wrong starting the connection. Please try again.</div>',[{lbl:'Try Again',fn:()=>{closeModal();hostRoom(NET.names[0]);}},{lbl:'Back to Menu',fn:()=>{closeModal();showMainMenu();}}]);
+    return;
+  }
   NET.peer=peer;
+  console.log('[attemptHostPeer] Peer object created, waiting for open/error/timeout');
   const timeout=setTimeout(()=>{
     if(settled)return;
     settled=true;

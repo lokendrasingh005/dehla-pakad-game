@@ -1567,7 +1567,7 @@ function endHand(){
   document.getElementById('histbtn').style.display='none';
   const coat=isCoat?'<div class="big">\uD83D\uDC51</div><div style="color:var(--gl);font-family:Cinzel;font-size:13px;letter-spacing:1px;margin-bottom:8px">COAT \u2014 ALL 4 TENS CAPTURED!</div>':(!isDraw?'<div class="big">\uD83C\uDF89</div>':'');
   const body=coat+'<div class="scorerow"><div class="scorebox'+(iWon===true?' win':'')+'"><div class="sbt">Team A</div><div class="sbn">'+u+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+ut+' tricks</div></div><div class="scorebox'+(iWon===false?' win':'')+'"><div class="sbt">Team B</div><div class="sbn">'+t+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+tt+' tricks</div></div></div>';
-  showModal(title,body,NET.mode==='client'?[]:[{lbl:'New Game',fn:newGame}],true);
+  showModal(title,body,NET.mode==='client'?[]:[{lbl:'New Game',fn:()=>triggerAdThenStart(newGame)}],true);
   if(NET.mode==='host')NET.broadcast({type:'modal',title,body});
 }
 

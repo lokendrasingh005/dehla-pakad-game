@@ -1074,7 +1074,14 @@ function triggerAdThenStart(startFn) {
     window.addEventListener('focus', onFocus);
     window.addEventListener('pageshow', onPageShow);
     setTimeout(resumeGame, 6000);
-    window.location.href = 'dehlaads://showinterstitial';
+
+    // New WebView-native ad bridge (used by the new Android Studio WebView app)
+    if (window.AndroidAds && typeof window.AndroidAds.showInterstitial === 'function') {
+        try { window.AndroidAds.showInterstitial(); } catch (e) { resumeGame(); }
+    } else {
+        // Old TWA intent-bridge path (still used by the main game's Bubblewrap app)
+        window.location.href = 'dehlaads://showinterstitial';
+    }
 }
   
   const SUITS=['♠','♥','♣','♦'];

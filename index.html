@@ -1147,6 +1147,7 @@ function nextStarterSeat(curSeat,winTeamIdx,isCoat){
 
 function newGame(){
   if(NET.mode==='client'){closeModal();NET.send({type:'reqNewGame'});info('Waiting for host to start a new hand...');return;}
+  if(NET.mode==='host') NET.broadcast({type:'showAd'});
   closeModal();
   if(G&&G.revTimer)clearInterval(G.revTimer);
   const d=shuffle(mkDeck());

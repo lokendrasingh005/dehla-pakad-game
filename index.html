@@ -2540,7 +2540,14 @@ function scoreFollow(p,idx,card,wm,dist,heapVal,tensAtStake){
   // E. Safe discard preference — when can't/shouldn't win
   if(!myBeats||(!teamWinsAfterMe&&!myBeats)){
     // I'm discarding. Prefer low, non-ten, non-trump.
-    score+=(1.0/(cardRV+1))*2.5;     // prefer low ranks
+    // Tens are handled separately (see ten-specific logic above/below),
+    // so we only strengthen this for non-ten cards to avoid interfering
+    // with correct "dump ten to winning partner" behavior.
+    if(card.r!=='10'){
+      score-=cardRV*0.8;   // strong penalty on high cards when just discarding
+    } else {
+      score+=(1.0/(cardRV+1))*2.5; // keep original gentle nudge for tens
+    }
     // Only penalize trump as a *discretionary* waste (chopping a non-trump
     // trick). If the lead suit itself is trump, I'm forced to follow suit —
     // ducking low here is the correct, safe play and must not be penalized,

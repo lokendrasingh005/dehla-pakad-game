@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
 }
 </script>
   <script>
-const APP_VERSION = 2;
+const APP_VERSION = 3;
 fetch('version.json?t=' + Date.now())
   .then(r => r.json())
   .then(data => {
@@ -3163,7 +3163,7 @@ function scheduleTurnTimeout(){
 /* Toggle AI control of a seat on/off (explicit handover / reclaim), for
    either a connected client's seat or the host's own seat 0. */
 function hostSetAIControl(seat,on){
-  if(on) NET.aiControlled.add(seat); else NET.aiControlled.add(seat);
+  if(on) NET.aiControlled.add(seat); else NET.aiControlled.delete(seat);
   renderNames();
   if(G) broadcastState();
   if(G&&!G.gameOver&&G.cur===seat){ clearTurnTimer(); maybeAI(on?400:0); }
@@ -3633,6 +3633,12 @@ function remapPayloadToCanonical(payload){
 function broadcastState(){
   const payload=remapPayloadToCanonical(serializeG());
   if(!payload) return;
+  // Trim heavy per-trick hand-snapshot data before sending over the network —
+  // clients don't need historical hand snapshots for live play, and this data
+  // grows every trick, making broadcasts slower as a hand goes on.
+  if(payload.log){
+    payload.log=payload.log.map(entry=>({...entry,snapshots:[]}));
+  }
   applyPNAMEHost();
   NET.broadcast({type:'state',payload,names:namesForBroadcast(),aiSeats:[...NET.aiControlled].map(toCanonical),roomCoat:ROOMCOAT});
 }

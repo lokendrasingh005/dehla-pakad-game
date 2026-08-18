@@ -3698,6 +3698,7 @@ function applyRemoteState(payload,names,aiSeats){
 /* ── HOST ── */
 async function hostRoom(name){
   if(typeof Peer==='undefined'){fmsg('Could not load networking library — check your connection');return;}
+  G=null; // clear any leftover game state (e.g. from an unfinished single-player game) so the lobby always shows
   NET.mode='host';NET.mySeat=0;NET.humanSeats=new Set();NET.conns={};
   NET.aiControlled=new Set();NET.migrationOffset=0;
   NET.names[0]=name||'You';

@@ -696,7 +696,10 @@ body.has-roombar #wrap{top:38px;}
 .react-tab-btn.sel{color:var(--gl);border-color:var(--gold);background:rgba(201,149,42,.15);}
 .react-emoji-btn{font-size:22px;background:rgba(255,255,255,.05);border:1px solid rgba(201,149,42,.3);border-radius:10px;padding:6px 10px;cursor:pointer;}
 .react-emoji-btn:active{transform:scale(.9);background:rgba(201,149,42,.15);}
-.react-phrase-btn{display:block;width:100%;box-sizing:border-box;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px;color:var(--gl);background:rgba(255,255,255,.04);border:1px solid rgba(201,149,42,.25);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer;text-align:left;}
+.react-phrase-btn{
+  display:block;width:100%;box-sizing:border-box;font-family:'Cinzel',serif;font-size:12px;letter-spacing:.5px;color:var(--gl);background:rgba(255,255,255,.04);border:1px solid rgba(201,149,42,.25);border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer;text-align:left;
+  max-height:220px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+}
 .react-phrase-btn:active{transform:scale(.97);background:rgba(201,149,42,.12);}
 .react-bubble{position:fixed;transform:translate(-50%,-50%);z-index:400;pointer-events:none;
   font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#fff8e8;

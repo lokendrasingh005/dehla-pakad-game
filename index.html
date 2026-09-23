@@ -1595,7 +1595,7 @@ function endHand(){
   document.getElementById('histbtn').style.display='none';
   const coat=isCoat?'<div class="big">\uD83D\uDC51</div><div style="color:var(--gl);font-family:Cinzel;font-size:13px;letter-spacing:1px;margin-bottom:8px">COAT \u2014 ALL 4 TENS CAPTURED!</div>':(!isDraw?'<div class="big">\uD83C\uDF89</div>':'');
   const body=coat+'<div class="scorerow"><div class="scorebox'+(iWon===true?' win':'')+'"><div class="sbt">Team A</div><div class="sbn">'+u+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+ut+' tricks</div></div><div class="scorebox'+(iWon===false?' win':'')+'"><div class="sbt">Team B</div><div class="sbn">'+t+'<span style="font-size:15px"> tens</span></div><div class="sbsub">'+tt+' tricks</div></div></div>';
-  showModal(title,body,NET.mode==='client'?[]:[{lbl:'New Game',fn:()=>{if(NET.mode==='host')NET.broadcast({type:'showAd'});triggerAdThenStart(newGame);}}],true);
+  showModal(title,body,NET.mode==='client'?[]:[{lbl:'New Game',fn:()=>{if(NET.mode==='host')NET.broadcast({type:'showAd'});triggerAdThenStart(newGame);}}].concat(NET.mode==='offline'?[{lbl:'Home',fn:()=>{closeModal();showMainMenu();}}]:[]),true);
   if(NET.mode==='host')NET.broadcast({type:'modal',title,body});
 }
 
@@ -4107,7 +4107,7 @@ const RULEBOOK_ONELINERS=[
   'A 10 must land in a trick before any cards can be collected.',
   'You must win two consecutive tricks to collect the heap.',
   'Break the streak (lose the very next trick) \u2014 the heap stays uncollected.',
-  'A fresh 10 dropped mid-streak restarts the count \u2014 one more consecutive win is needed.',
+  'A new 10 mid-streak resets the count \u2014 one more consecutive win is needed.',
   'Weak hand: if all your cards are below 10 after the 5-card phase, the hand is dismissed and redealt.'
 ];
 function rulebookBody(){
